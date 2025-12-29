@@ -46,11 +46,25 @@ export const requestAirdrop = async (
   amount: number = 1
 ): Promise<string> => {
   const connection = getConnection();
+  
+  // Get the latest blockhash BEFORE requesting the airdrop
+  const latestBlockhash = await connection.getLatestBlockhash('confirmed');
+  
   const signature = await connection.requestAirdrop(
     publicKey,
     amount * LAMPORTS_PER_SOL
   );
-  await connection.confirmTransaction(signature);
+  
+  // Confirm the transaction with the blockhash
+  await connection.confirmTransaction(
+    {
+      signature,
+      blockhash: latestBlockhash.blockhash,
+      lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+    },
+    'confirmed'
+  );
+  
   return signature;
 };
 

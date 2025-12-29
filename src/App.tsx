@@ -10,6 +10,7 @@ import { Tokens } from './pages/Tokens';
 import { Explore } from './pages/Explore';
 import { Settings } from './pages/Settings';
 import { Welcome } from './pages/Welcome';
+import { Extension } from './pages/Extension';
 import { AuthPage } from './pages/AuthPage.tsx';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
@@ -91,6 +92,7 @@ function ClerkApp() {
               hasWallet ? <Tokens /> : <Navigate to="/login" replace />
             } />
             <Route path="/explore" element={<Explore />} />
+            <Route path="/extension" element={<Extension />} />
             <Route path="/settings" element={
               hasWallet ? <Settings /> : <Navigate to="/login" replace />
             } />
@@ -136,6 +138,7 @@ function LegacyApp() {
               <Route path="/transactions" element={<Transactions />} />
               <Route path="/tokens" element={<Tokens />} />
               <Route path="/explore" element={<Explore />} />
+              <Route path="/extension" element={<Extension />} />
               <Route path="/settings" element={<Settings />} />
             </Route>
           ) : (
