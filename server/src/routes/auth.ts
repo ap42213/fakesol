@@ -3,9 +3,22 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
-import { prisma } from '../lib/prisma';
+import { prisma } from '../lib/prisma.js';
 
 const router = Router();
+
+// Check if database is available
+const checkDatabase = (_req: Request, res: Response, next: NextFunction) => {
+  if (!prisma) {
+    return res.status(503).json({ 
+      error: 'Database unavailable', 
+      message: 'Authentication requires database. Set DATABASE_URL.' 
+    });
+  }
+  next();
+};
+
+router.use(checkDatabase);
 
 const JWT_SECRET = process.env.JWT_SECRET || 'fakesol-dev-secret-change-in-production';
 const JWT_EXPIRES_IN = '30d';
@@ -71,7 +84,7 @@ export const optionalAuthMiddleware = async (req: AuthRequest, res: Response, ne
 // Track analytics event
 async function trackEvent(event: string, userId?: string, email?: string, metadata?: any) {
   try {
-    await prisma.analytics.create({
+    await prisma!.analytics.create({
       data: {
         event,
         userId,
@@ -105,7 +118,7 @@ router.post('/register', async (req: Request, res: Response) => {
     }
 
     // Check if user already exists
-    const existingUser = await prisma.user.findUnique({
+    const existingUser = await prisma!.user.findUnique({
       where: { email: email.toLowerCase() },
     });
 
@@ -122,7 +135,7 @@ router.post('/register', async (req: Request, res: Response) => {
     const privateKey = bs58.encode(keypair.secretKey);
 
     // Create user with wallet
-    const user = await prisma.user.create({
+    const user = await prisma!.user.create({
       data: {
         email: email.toLowerCase(),
         password: hashedPassword,
@@ -194,7 +207,7 @@ router.post('/login', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Email and password are required' });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await prisma!.user.findUnique({
       where: { email: email.toLowerCase() },
       include: { wallets: true },
     });
@@ -209,7 +222,7 @@ router.post('/login', async (req: Request, res: Response) => {
     }
 
     // Update login stats
-    await prisma.user.update({
+    await prisma!.user.update({
       where: { id: user.id },
       data: {
         loginCount: { increment: 1 },
@@ -268,7 +281,7 @@ router.post('/logout', (req: Request, res: Response) => {
 // Get current user
 router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
   try {
-    const user = await prisma.user.findUnique({
+    const user = await prisma!.user.findUnique({
       where: { id: req.user!.id },
       include: { wallets: true },
     });
@@ -309,9 +322,9 @@ router.post('/wallets', authMiddleware, async (req: AuthRequest, res: Response) 
     const publicKey = keypair.publicKey.toBase58();
     const privateKey = bs58.encode(keypair.secretKey);
 
-    const wallet = await prisma.wallet.create({
+    const wallet = await prisma!.wallet.create({
       data: {
-        name: name || `Wallet ${await prisma.wallet.count({ where: { userId: req.user!.id } }) + 1}`,
+        name: name || `Wallet ${await prisma!.wallet.count({ where: { userId: req.user!.id } }) + 1}`,
         publicKey,
         privateKey: encryptPrivateKey(privateKey),
         userId: req.user!.id,
@@ -340,7 +353,7 @@ router.patch('/wallets/:id', authMiddleware, async (req: AuthRequest, res: Respo
     const { id } = req.params;
     const { name } = req.body;
 
-    const wallet = await prisma.wallet.findFirst({
+    const wallet = await prisma!.wallet.findFirst({
       where: { id, userId: req.user!.id },
     });
 
@@ -348,7 +361,7 @@ router.patch('/wallets/:id', authMiddleware, async (req: AuthRequest, res: Respo
       return res.status(404).json({ error: 'Wallet not found' });
     }
 
-    const updated = await prisma.wallet.update({
+    const updated = await prisma!.wallet.update({
       where: { id },
       data: { name },
     });
@@ -370,7 +383,7 @@ router.delete('/wallets/:id', authMiddleware, async (req: AuthRequest, res: Resp
   try {
     const { id } = req.params;
 
-    const wallet = await prisma.wallet.findFirst({
+    const wallet = await prisma!.wallet.findFirst({
       where: { id, userId: req.user!.id },
     });
 
@@ -379,7 +392,7 @@ router.delete('/wallets/:id', authMiddleware, async (req: AuthRequest, res: Resp
     }
 
     // Ensure user has at least one wallet
-    const walletCount = await prisma.wallet.count({
+    const walletCount = await prisma!.wallet.count({
       where: { userId: req.user!.id },
     });
 
@@ -387,7 +400,7 @@ router.delete('/wallets/:id', authMiddleware, async (req: AuthRequest, res: Resp
       return res.status(400).json({ error: 'Cannot delete last wallet' });
     }
 
-    await prisma.wallet.delete({ where: { id } });
+    await prisma!.wallet.delete({ where: { id } });
 
     res.json({ success: true });
   } catch (error) {
@@ -416,7 +429,7 @@ router.post('/wallets/import', authMiddleware, async (req: AuthRequest, res: Res
     }
 
     // Check if wallet already exists for this user
-    const existingWallet = await prisma.wallet.findFirst({
+    const existingWallet = await prisma!.wallet.findFirst({
       where: { publicKey, userId: req.user!.id },
     });
 
@@ -424,7 +437,7 @@ router.post('/wallets/import', authMiddleware, async (req: AuthRequest, res: Res
       return res.status(400).json({ error: 'Wallet already imported' });
     }
 
-    const wallet = await prisma.wallet.create({
+    const wallet = await prisma!.wallet.create({
       data: {
         name: name || `Imported Wallet`,
         publicKey,

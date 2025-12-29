@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import routes from './routes.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
+import { isDatabaseEnabled } from './lib/prisma.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -34,11 +35,25 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-// Auth Routes
-app.use('/api/auth', authRoutes);
-
-// Admin Routes
-app.use('/api/admin', adminRoutes);
+// Auth Routes (only if database is enabled)
+if (isDatabaseEnabled) {
+  app.use('/api/auth', authRoutes);
+  app.use('/api/admin', adminRoutes);
+} else {
+  // Provide fallback routes that return helpful error
+  app.use('/api/auth', (_req, res) => {
+    res.status(503).json({ 
+      error: 'Authentication unavailable', 
+      message: 'Database not configured. Set DATABASE_URL environment variable.' 
+    });
+  });
+  app.use('/api/admin', (_req, res) => {
+    res.status(503).json({ 
+      error: 'Admin API unavailable', 
+      message: 'Database not configured. Set DATABASE_URL environment variable.' 
+    });
+  });
+}
 
 // API Routes
 app.use('/api', routes);

@@ -1,7 +1,20 @@
-import { Router, Request, Response } from 'express';
-import { prisma } from '../lib/prisma';
+import { Router, Request, Response, NextFunction } from 'express';
+import { prisma } from '../lib/prisma.js';
 
 const router = Router();
+
+// Check if database is available
+const checkDatabase = (_req: Request, res: Response, next: NextFunction) => {
+  if (!prisma) {
+    return res.status(503).json({ 
+      error: 'Database unavailable', 
+      message: 'Admin API requires database. Set DATABASE_URL.' 
+    });
+  }
+  next();
+};
+
+router.use(checkDatabase);
 
 // Simple admin auth (in production, use proper admin authentication)
 const ADMIN_KEY = process.env.ADMIN_API_KEY || 'fakesol-admin-key-change-me';
@@ -17,13 +30,13 @@ const adminAuth = (req: Request, res: Response, next: () => void) => {
 // Get signup analytics
 router.get('/signups', adminAuth, async (_req: Request, res: Response) => {
   try {
-    const totalUsers = await prisma.user.count();
+    const totalUsers = await prisma!.user.count();
     
     // Signups by day (last 30 days)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
     
-    const recentSignups = await prisma.user.findMany({
+    const recentSignups = await prisma!.user.findMany({
       where: {
         createdAt: { gte: thirtyDaysAgo },
       },
@@ -41,7 +54,7 @@ router.get('/signups', adminAuth, async (_req: Request, res: Response) => {
     });
 
     // Daily signups
-    const signupsByDay = await prisma.$queryRaw`
+    const signupsByDay = await prisma!.$queryRaw`
       SELECT DATE(created_at) as date, COUNT(*) as count
       FROM "User"
       WHERE created_at >= ${thirtyDaysAgo}
@@ -50,7 +63,7 @@ router.get('/signups', adminAuth, async (_req: Request, res: Response) => {
     `;
 
     // Total wallets
-    const totalWallets = await prisma.wallet.count();
+    const totalWallets = await prisma!.wallet.count();
 
     res.json({
       totalUsers,
@@ -87,14 +100,14 @@ router.get('/events', adminAuth, async (req: Request, res: Response) => {
       where.event = event as string;
     }
 
-    const events = await prisma.analytics.findMany({
+    const events = await prisma!.analytics.findMany({
       where,
       orderBy: { createdAt: 'desc' },
       take: 1000,
     });
 
     // Group by event type
-    const eventCounts = await prisma.analytics.groupBy({
+    const eventCounts = await prisma!.analytics.groupBy({
       by: ['event'],
       where: { createdAt: { gte: daysAgo } },
       _count: { id: true },
@@ -116,7 +129,7 @@ router.get('/events', adminAuth, async (req: Request, res: Response) => {
 // Export user emails (for marketing)
 router.get('/emails', adminAuth, async (_req: Request, res: Response) => {
   try {
-    const users = await prisma.user.findMany({
+    const users = await prisma!.user.findMany({
       select: {
         email: true,
         createdAt: true,
