@@ -71,6 +71,21 @@ app.use('/api', routes);
 // Serve static frontend in production
 if (isProduction) {
   const publicPath = path.join(__dirname, '..', 'public');
+
+  // Runtime env injection for the SPA (public values only).
+  // Avoids relying on build-time Vite env injection on platforms like Railway.
+  app.get('/env.js', (_req, res) => {
+    const env = {
+      VITE_CLERK_PUBLISHABLE_KEY:
+        process.env.VITE_CLERK_PUBLISHABLE_KEY || process.env.CLERK_PUBLISHABLE_KEY || '',
+      VITE_API_URL: process.env.VITE_API_URL || process.env.API_URL || '',
+    };
+
+    res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store');
+    res.status(200).send(`window.__ENV__ = ${JSON.stringify(env)};`);
+  });
+
   app.use(express.static(publicPath));
   
   // SPA fallback - serve index.html for all non-API routes

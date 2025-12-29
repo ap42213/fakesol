@@ -1,10 +1,27 @@
 import { SignIn, SignUp } from '@clerk/clerk-react';
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { FaWallet } from 'react-icons/fa';
 
-export function AuthPage() {
-  const [mode, setMode] = useState<'sign-in' | 'sign-up'>('sign-in');
+type AuthMode = 'sign-in' | 'sign-up';
+
+export function AuthPage({ initialMode }: { initialMode?: AuthMode }) {
+  const location = useLocation();
+  const [mode, setMode] = useState<AuthMode>(initialMode ?? 'sign-in');
+
+  useEffect(() => {
+    if (initialMode) {
+      setMode(initialMode);
+      return;
+    }
+
+    // Support legacy hash-based navigation from Clerk links.
+    if (location.hash.includes('sign-up')) {
+      setMode('sign-up');
+    } else if (location.hash.includes('sign-in')) {
+      setMode('sign-in');
+    }
+  }, [initialMode, location.hash]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center p-4">
@@ -45,7 +62,7 @@ export function AuthPage() {
                 },
               }}
               routing="hash"
-              signUpUrl="/login#sign-up"
+              signUpUrl="/register"
               afterSignInUrl="/dashboard"
             />
           ) : (
@@ -67,7 +84,7 @@ export function AuthPage() {
                 },
               }}
               routing="hash"
-              signInUrl="/login#sign-in"
+              signInUrl="/login"
               afterSignUpUrl="/dashboard"
             />
           )}

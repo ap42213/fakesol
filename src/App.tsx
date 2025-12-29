@@ -10,13 +10,16 @@ import { Tokens } from './pages/Tokens';
 import { Explore } from './pages/Explore';
 import { Settings } from './pages/Settings';
 import { Welcome } from './pages/Welcome';
-import { AuthPage } from './pages/AuthPage';
+import { AuthPage } from './pages/AuthPage.tsx';
+import { Login } from './pages/Login';
+import { Register } from './pages/Register';
 import { useWalletStore } from './store/walletStore';
 import { useAuthStore } from './store/authStore';
 import { ToastProvider } from './components/ui/index';
+import { getEnv } from './lib/env.ts';
 
 // Check if Clerk is configured
-const clerkEnabled = !!import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;
+const clerkEnabled = !!getEnv('VITE_CLERK_PUBLISHABLE_KEY');
 
 function ClerkApp() {
   const { isSignedIn, user: clerkUser } = useUser();
@@ -37,17 +40,32 @@ function ClerkApp() {
       <BrowserRouter>
         <Routes>
           {/* Auth page */}
-          <Route path="/login" element={
-            <SignedIn>
-              <Navigate to="/dashboard" replace />
-            </SignedIn>
-          } />
-          <Route path="/login" element={
-            <SignedOut>
-              <AuthPage />
-            </SignedOut>
-          } />
-          <Route path="/register" element={<Navigate to="/login" replace />} />
+          <Route
+            path="/login"
+            element={
+              <>
+                <SignedIn>
+                  <Navigate to="/dashboard" replace />
+                </SignedIn>
+                <SignedOut>
+                  <AuthPage initialMode="sign-in" />
+                </SignedOut>
+              </>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <>
+                <SignedIn>
+                  <Navigate to="/dashboard" replace />
+                </SignedIn>
+                <SignedOut>
+                  <AuthPage initialMode="sign-up" />
+                </SignedOut>
+              </>
+            }
+          />
           
           {/* Protected routes */}
           <Route element={<Layout />}>
@@ -98,10 +116,10 @@ function LegacyApp() {
       <BrowserRouter>
         <Routes>
           <Route path="/login" element={
-            hasWallet ? <Navigate to="/dashboard" replace /> : <AuthPage />
+            hasWallet ? <Navigate to="/dashboard" replace /> : <Login />
           } />
           <Route path="/register" element={
-            hasWallet ? <Navigate to="/dashboard" replace /> : <AuthPage />
+            hasWallet ? <Navigate to="/dashboard" replace /> : <Register />
           } />
           
           {hasWallet ? (
