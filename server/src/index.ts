@@ -1,13 +1,16 @@
 import 'dotenv/config';
+import './types/express.js';
 import express from 'express';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import passport from 'passport';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import routes from './routes.js';
 import authRoutes from './routes/auth.js';
 import adminRoutes from './routes/admin.js';
+import oauthRoutes from './routes/oauth.js';
 import { isDatabaseEnabled } from './lib/prisma.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -26,6 +29,7 @@ app.use(cors({
 }));
 app.use(express.json());
 app.use(cookieParser());
+app.use(passport.initialize());
 
 // Global rate limiting
 const limiter = rateLimit({
@@ -38,12 +42,19 @@ app.use(limiter);
 // Auth Routes (only if database is enabled)
 if (isDatabaseEnabled) {
   app.use('/api/auth', authRoutes);
+  app.use('/api/oauth', oauthRoutes);
   app.use('/api/admin', adminRoutes);
 } else {
   // Provide fallback routes that return helpful error
   app.use('/api/auth', (_req, res) => {
     res.status(503).json({ 
       error: 'Authentication unavailable', 
+      message: 'Database not configured. Set DATABASE_URL environment variable.' 
+    });
+  });
+  app.use('/api/oauth', (_req, res) => {
+    res.status(503).json({ 
+      error: 'OAuth unavailable', 
       message: 'Database not configured. Set DATABASE_URL environment variable.' 
     });
   });

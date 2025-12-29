@@ -216,6 +216,13 @@ router.post('/login', async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Invalid email or password' });
     }
 
+    // OAuth users don't have a password - they must use OAuth login
+    if (!user.password) {
+      return res.status(401).json({ 
+        error: 'This account uses social login. Please sign in with Google.' 
+      });
+    }
+
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
       return res.status(401).json({ error: 'Invalid email or password' });
@@ -279,10 +286,11 @@ router.post('/logout', (req: Request, res: Response) => {
 });
 
 // Get current user
-router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.get('/me', authMiddleware, async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   try {
     const user = await prisma!.user.findUnique({
-      where: { id: req.user!.id },
+      where: { id: authReq.user!.id },
       include: { wallets: true },
     });
 
@@ -313,7 +321,8 @@ router.get('/me', authMiddleware, async (req: AuthRequest, res: Response) => {
 });
 
 // Create new wallet for authenticated user
-router.post('/wallets', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.post('/wallets', authMiddleware, async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   try {
     const { name } = req.body;
 
@@ -324,15 +333,15 @@ router.post('/wallets', authMiddleware, async (req: AuthRequest, res: Response) 
 
     const wallet = await prisma!.wallet.create({
       data: {
-        name: name || `Wallet ${await prisma!.wallet.count({ where: { userId: req.user!.id } }) + 1}`,
+        name: name || `Wallet ${await prisma!.wallet.count({ where: { userId: authReq.user!.id } }) + 1}`,
         publicKey,
         privateKey: encryptPrivateKey(privateKey),
-        userId: req.user!.id,
+        userId: authReq.user!.id,
       },
     });
 
     // Track wallet creation
-    await trackEvent('wallet_created', req.user!.id);
+    await trackEvent('wallet_created', authReq.user!.id);
 
     res.json({
       id: wallet.id,
@@ -348,13 +357,14 @@ router.post('/wallets', authMiddleware, async (req: AuthRequest, res: Response) 
 });
 
 // Rename wallet
-router.patch('/wallets/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.patch('/wallets/:id', authMiddleware, async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   try {
     const { id } = req.params;
     const { name } = req.body;
 
     const wallet = await prisma!.wallet.findFirst({
-      where: { id, userId: req.user!.id },
+      where: { id, userId: authReq.user!.id },
     });
 
     if (!wallet) {
@@ -379,12 +389,13 @@ router.patch('/wallets/:id', authMiddleware, async (req: AuthRequest, res: Respo
 });
 
 // Delete wallet
-router.delete('/wallets/:id', authMiddleware, async (req: AuthRequest, res: Response) => {
+router.delete('/wallets/:id', authMiddleware, async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   try {
     const { id } = req.params;
 
     const wallet = await prisma!.wallet.findFirst({
-      where: { id, userId: req.user!.id },
+      where: { id, userId: authReq.user!.id },
     });
 
     if (!wallet) {
@@ -393,7 +404,7 @@ router.delete('/wallets/:id', authMiddleware, async (req: AuthRequest, res: Resp
 
     // Ensure user has at least one wallet
     const walletCount = await prisma!.wallet.count({
-      where: { userId: req.user!.id },
+      where: { userId: authReq.user!.id },
     });
 
     if (walletCount <= 1) {
@@ -410,7 +421,9 @@ router.delete('/wallets/:id', authMiddleware, async (req: AuthRequest, res: Resp
 });
 
 // Import wallet from private key
-router.post('/wallets/import', authMiddleware, async (req: AuthRequest, res: Response) => {
+// Import wallet from private key
+router.post('/wallets/import', authMiddleware, async (req: Request, res: Response) => {
+  const authReq = req as AuthRequest;
   try {
     const { privateKey, name } = req.body;
 
@@ -430,7 +443,7 @@ router.post('/wallets/import', authMiddleware, async (req: AuthRequest, res: Res
 
     // Check if wallet already exists for this user
     const existingWallet = await prisma!.wallet.findFirst({
-      where: { publicKey, userId: req.user!.id },
+      where: { publicKey, userId: authReq.user!.id },
     });
 
     if (existingWallet) {
@@ -442,12 +455,12 @@ router.post('/wallets/import', authMiddleware, async (req: AuthRequest, res: Res
         name: name || `Imported Wallet`,
         publicKey,
         privateKey: encryptPrivateKey(privateKey),
-        userId: req.user!.id,
+        userId: authReq.user!.id,
       },
     });
 
     // Track import
-    await trackEvent('wallet_imported', req.user!.id);
+    await trackEvent('wallet_imported', authReq.user!.id);
 
     res.json({
       id: wallet.id,

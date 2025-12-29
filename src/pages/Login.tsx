@@ -1,7 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { FiMail, FiLock, FiUser, FiAlertCircle } from 'react-icons/fi';
+import { FcGoogle } from 'react-icons/fc';
+
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
 export function Login() {
   const navigate = useNavigate();
@@ -9,6 +12,15 @@ export function Login() {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [oauthProviders, setOauthProviders] = useState<{ google: boolean; github: boolean }>({ google: false, github: false });
+
+  useEffect(() => {
+    // Check available OAuth providers
+    fetch(`${API_URL}/api/oauth/providers`)
+      .then(res => res.json())
+      .then(data => setOauthProviders(data))
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,6 +107,27 @@ export function Login() {
               )}
             </button>
           </form>
+
+          {oauthProviders.google && (
+            <>
+              <div className="relative my-6">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-white/10"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-4 bg-background-card text-text-muted">or continue with</span>
+                </div>
+              </div>
+
+              <a
+                href={`${API_URL}/api/oauth/google`}
+                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-white text-gray-800 font-medium hover:bg-gray-100 transition-colors"
+              >
+                <FcGoogle className="w-5 h-5" />
+                Continue with Google
+              </a>
+            </>
+          )}
 
           <div className="mt-6 text-center">
             <p className="text-text-muted">

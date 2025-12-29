@@ -13,12 +13,18 @@ datasource db {
 model User {
   id            String   @id @default(cuid())
   email         String   @unique
-  password      String
+  password      String?  // Optional for OAuth users
+  name          String?
+  avatar        String?
+  provider      String   @default("email") // email, google, github
+  providerId    String?  // OAuth provider user ID
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
   lastLoginAt   DateTime?
   loginCount    Int      @default(0)
   wallets       Wallet[]
+  
+  @@index([provider, providerId])
 }
 
 model Wallet {

@@ -11,6 +11,7 @@ import { Settings } from './pages/Settings';
 import { Welcome } from './pages/Welcome';
 import { Login } from './pages/Login';
 import { Register } from './pages/Register';
+import { OAuthCallback } from './pages/OAuthCallback';
 import { useWalletStore } from './store/walletStore';
 import { useAuthStore } from './store/authStore';
 import { ToastProvider } from './components/ui/index';
@@ -31,6 +32,9 @@ function App() {
     <ToastProvider>
       <BrowserRouter>
         <Routes>
+          {/* OAuth callback - always accessible */}
+          <Route path="/oauth/callback" element={<OAuthCallback />} />
+          
           {/* Public routes */}
           <Route path="/login" element={
             hasWallet ? <Navigate to="/dashboard" replace /> : <Login />
