@@ -15,6 +15,7 @@
     "install:all": "npm install && cd server && npm install"
   },
   "dependencies": {
+    "@clerk/clerk-react": "^5.59.2",
     "@solana/spl-token": "^0.4.0",
     "@solana/web3.js": "^1.95.0",
     "bs58": "^5.0.0",

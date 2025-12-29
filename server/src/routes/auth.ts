@@ -97,6 +97,108 @@ async function trackEvent(event: string, userId?: string, email?: string, metada
   }
 }
 
+// Sync with Clerk (for Clerk-authenticated users)
+router.post('/clerk-sync', async (req: Request, res: Response) => {
+  try {
+    const { clerkId, email } = req.body;
+
+    if (!clerkId || !email) {
+      return res.status(400).json({ error: 'Clerk ID and email are required' });
+    }
+
+    // Find or create user
+    let user = await prisma!.user.findFirst({
+      where: { 
+        OR: [
+          { providerId: clerkId },
+          { email: email.toLowerCase() }
+        ]
+      },
+      include: { wallets: true },
+    });
+
+    if (!user) {
+      // Create new user with wallet
+      const keypair = Keypair.generate();
+      const publicKey = keypair.publicKey.toBase58();
+      const privateKey = bs58.encode(keypair.secretKey);
+
+      user = await prisma!.user.create({
+        data: {
+          email: email.toLowerCase(),
+          provider: 'clerk',
+          providerId: clerkId,
+          loginCount: 1,
+          lastLoginAt: new Date(),
+          wallets: {
+            create: {
+              name: 'My Wallet',
+              publicKey,
+              privateKey: encryptPrivateKey(privateKey),
+            },
+          },
+        },
+        include: { wallets: true },
+      });
+
+      // Track signup
+      await trackEvent('signup', user.id, user.email, { provider: 'clerk' });
+    } else {
+      // Update existing user
+      user = await prisma!.user.update({
+        where: { id: user.id },
+        data: {
+          provider: 'clerk',
+          providerId: clerkId,
+          loginCount: { increment: 1 },
+          lastLoginAt: new Date(),
+        },
+        include: { wallets: true },
+      });
+
+      // Track login
+      await trackEvent('login', user.id, user.email, { provider: 'clerk' });
+    }
+
+    // Generate JWT
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    // Set cookie
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    // Decrypt private keys for response
+    const wallets = user.wallets.map((w: { id: string; name: string; publicKey: string; privateKey: string; createdAt: Date }) => ({
+      id: w.id,
+      name: w.name,
+      publicKey: w.publicKey,
+      privateKey: decryptPrivateKey(w.privateKey),
+      createdAt: w.createdAt.toISOString(),
+    }));
+
+    res.json({
+      user: {
+        id: user.id,
+        email: user.email,
+        createdAt: user.createdAt,
+      },
+      token,
+      wallets,
+    });
+  } catch (error) {
+    console.error('Clerk sync error:', error);
+    res.status(500).json({ error: 'Sync failed' });
+  }
+});
+
 // Register new user
 router.post('/register', async (req: Request, res: Response) => {
   try {
