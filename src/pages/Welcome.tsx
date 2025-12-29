@@ -3,17 +3,41 @@ import { useWalletStore } from '../store/walletStore';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
-import { Icons, Badge } from '../components/ui/index';
+import { Icons, Badge, Modal } from '../components/ui/index';
 
 export function Welcome() {
   const [mode, setMode] = useState<'home' | 'import'>('home');
   const [privateKey, setPrivateKey] = useState('');
   const [error, setError] = useState('');
+  const [showBackupModal, setShowBackupModal] = useState(false);
+  const [newWalletKey, setNewWalletKey] = useState<string | null>(null);
+  const [backedUp, setBackedUp] = useState(false);
   
   const { createWallet, importWalletFromKey } = useWalletStore();
 
   const handleCreate = () => {
     createWallet();
+    // Get the private key immediately after creation
+    setTimeout(() => {
+      const key = useWalletStore.getState().exportKey();
+      if (key) {
+        setNewWalletKey(key);
+        setShowBackupModal(true);
+      }
+    }, 100);
+  };
+
+  const handleCopyKey = async () => {
+    if (newWalletKey) {
+      await navigator.clipboard.writeText(newWalletKey);
+      setBackedUp(true);
+    }
+  };
+
+  const handleCloseBackupModal = () => {
+    setShowBackupModal(false);
+    setNewWalletKey(null);
+    setBackedUp(false);
   };
 
   const handleImport = () => {
@@ -169,6 +193,63 @@ export function Welcome() {
           Built for developers • Open source
         </p>
       </div>
+
+      {/* Backup Modal */}
+      <Modal
+        isOpen={showBackupModal}
+        onClose={() => {}}
+        title="🔐 Backup Your Wallet"
+      >
+        <div className="space-y-4">
+          <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-xl">
+            <p className="text-sm text-red-400 font-medium">
+              ⚠️ Important: Save your private key NOW
+            </p>
+            <p className="text-xs text-red-400/80 mt-1">
+              This is the ONLY way to recover your wallet. We cannot recover it for you.
+            </p>
+          </div>
+
+          <div>
+            <p className="text-sm text-zinc-400 mb-2">Your Private Key:</p>
+            <div className="bg-zinc-800 rounded-xl p-4 relative">
+              <p className="font-mono text-xs text-zinc-300 break-all pr-10 select-all">
+                {newWalletKey}
+              </p>
+              <button
+                onClick={handleCopyKey}
+                className="absolute top-3 right-3 p-2 bg-zinc-700 hover:bg-zinc-600 rounded-lg transition-colors"
+              >
+                {backedUp ? (
+                  <svg className="w-4 h-4 text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                ) : (
+                  <svg className="w-4 h-4 text-zinc-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                  </svg>
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="p-3 bg-zinc-800/50 rounded-xl">
+            <p className="text-xs text-zinc-400">
+              💡 <strong>Tip:</strong> Store this in a password manager or write it down and keep it safe.
+            </p>
+          </div>
+
+          <Button
+            fullWidth
+            size="lg"
+            onClick={handleCloseBackupModal}
+            disabled={!backedUp}
+            variant={backedUp ? 'primary' : 'secondary'}
+          >
+            {backedUp ? "I've Saved My Key - Continue" : 'Copy Key First to Continue'}
+          </Button>
+        </div>
+      </Modal>
     </div>
   );
 }
