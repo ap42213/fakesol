@@ -1,5 +1,5 @@
 # Build frontend
-FROM node:20-alpine AS frontend-builder
+FROM node:20-bookworm-slim AS frontend-builder
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
@@ -7,7 +7,7 @@ COPY . .
 RUN npm run build
 
 # Build backend
-FROM node:20-alpine AS backend-builder
+FROM node:20-bookworm-slim AS backend-builder
 WORKDIR /app/server
 COPY server/package*.json ./
 COPY server/prisma ./prisma
@@ -17,7 +17,7 @@ COPY server/ .
 RUN npm run build
 
 # Production image
-FROM node:20-alpine AS production
+FROM node:20-bookworm-slim AS production
 WORKDIR /app
 
 # Copy backend
