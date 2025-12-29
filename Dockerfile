@@ -10,7 +10,10 @@ RUN npm run build
 FROM node:20-alpine AS backend-builder
 WORKDIR /app/server
 COPY server/package*.json ./
+COPY server/prisma ./prisma
+COPY server/prisma.config.ts ./
 RUN npm ci
+RUN npx prisma generate
 COPY server/ .
 RUN npm run build
 
@@ -22,6 +25,7 @@ WORKDIR /app
 COPY --from=backend-builder /app/server/dist ./dist
 COPY --from=backend-builder /app/server/node_modules ./node_modules
 COPY --from=backend-builder /app/server/package.json ./
+COPY --from=backend-builder /app/server/prisma ./prisma
 
 # Copy frontend build to be served by backend
 COPY --from=frontend-builder /app/dist ./public
