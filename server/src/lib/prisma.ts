@@ -8,8 +8,8 @@ const globalForPrisma = globalThis as unknown as {
 let prismaClient: PrismaClient | null = null;
 let dbEnabled = false;
 
-try {
-  if (process.env.DATABASE_URL) {
+if (process.env.DATABASE_URL) {
+  try {
     prismaClient = globalForPrisma.prisma ?? new PrismaClient();
     dbEnabled = true;
     
@@ -17,13 +17,13 @@ try {
       globalForPrisma.prisma = prismaClient;
     }
     console.log('✅ Database connection configured');
-  } else {
-    console.warn('⚠️ DATABASE_URL not set - authentication features disabled');
+  } catch (error) {
+    console.error('❌ Failed to initialize Prisma client:', error);
+    prismaClient = null;
+    dbEnabled = false;
   }
-} catch (error) {
-  console.error('❌ Failed to initialize Prisma client:', error);
-  prismaClient = null;
-  dbEnabled = false;
+} else {
+  console.warn('⚠️ DATABASE_URL not set - authentication features disabled');
 }
 
 export const prisma = prismaClient;

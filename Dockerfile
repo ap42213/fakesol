@@ -11,7 +11,6 @@ FROM node:20-alpine AS backend-builder
 WORKDIR /app/server
 COPY server/package*.json ./
 COPY server/prisma ./prisma
-COPY server/prisma.config.ts ./
 RUN npm ci
 RUN npx prisma generate
 COPY server/ .
