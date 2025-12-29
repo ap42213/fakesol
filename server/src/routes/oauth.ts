@@ -12,6 +12,10 @@ const JWT_SECRET = process.env.JWT_SECRET || 'fakesol-dev-secret-change-in-produ
 const JWT_EXPIRES_IN = '30d';
 const FRONTEND_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
 
+const googleClientId = process.env.GOOGLE_CLIENT_ID;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET;
+const googleEnabled = !!(googleClientId && googleClientSecret);
+
 // Encryption for private keys
 function encryptPrivateKey(privateKey: string): string {
   const buffer = Buffer.from(privateKey);
@@ -19,12 +23,12 @@ function encryptPrivateKey(privateKey: string): string {
 }
 
 // Configure Google Strategy
-if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+if (googleEnabled) {
   passport.use(
     new GoogleStrategy(
       {
-        clientID: process.env.GOOGLE_CLIENT_ID,
-        clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+        clientID: googleClientId!,
+        clientSecret: googleClientSecret!,
         callbackURL: `${process.env.API_URL || 'http://localhost:3001'}/api/oauth/google/callback`,
       },
       async (
@@ -118,8 +122,6 @@ if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
     )
   );
   console.log('✅ Google OAuth configured');
-} else {
-  console.warn('⚠️ Google OAuth not configured - set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET');
 }
 
 // Serialize user for session
@@ -132,47 +134,49 @@ passport.deserializeUser((user: Express.User, done) => {
 });
 
 // Google OAuth routes
-router.get(
-  '/google',
-  passport.authenticate('google', {
-    scope: ['profile', 'email'],
-    session: false,
-  })
-);
+if (googleEnabled) {
+  router.get(
+    '/google',
+    passport.authenticate('google', {
+      scope: ['profile', 'email'],
+      session: false,
+    })
+  );
 
-router.get(
-  '/google/callback',
-  passport.authenticate('google', {
-    session: false,
-    failureRedirect: `${FRONTEND_URL}/login?error=oauth_failed`,
-  }),
-  (req: Request, res: Response) => {
-    const user = req.user as { id: string; email: string };
-    
-    // Generate JWT
-    const token = jwt.sign(
-      { id: user.id, email: user.email },
-      JWT_SECRET,
-      { expiresIn: JWT_EXPIRES_IN }
-    );
+  router.get(
+    '/google/callback',
+    passport.authenticate('google', {
+      session: false,
+      failureRedirect: `${FRONTEND_URL}/login?error=oauth_failed`,
+    }),
+    (req: Request, res: Response) => {
+      const user = req.user as { id: string; email: string };
 
-    // Set cookie
-    res.cookie('token', token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
-      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
-    });
+      // Generate JWT
+      const token = jwt.sign(
+        { id: user.id, email: user.email },
+        JWT_SECRET,
+        { expiresIn: JWT_EXPIRES_IN }
+      );
 
-    // Redirect to frontend with token
-    res.redirect(`${FRONTEND_URL}/oauth/callback?token=${token}`);
-  }
-);
+      // Set cookie
+      res.cookie('token', token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      });
+
+      // Redirect to frontend with token
+      res.redirect(`${FRONTEND_URL}/oauth/callback?token=${token}`);
+    }
+  );
+}
 
 // Check OAuth availability
 router.get('/providers', (_req: Request, res: Response) => {
   res.json({
-    google: !!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET),
+    google: googleEnabled,
     github: !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET),
   });
 });
