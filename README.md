@@ -9,11 +9,14 @@ The devnet-only Solana wallet. **Real testing. Fake SOL.**
 ## Features
 
 - ✨ **Create or Import Wallets** - Generate new keypairs or import existing ones
+- � **Account System** - Sign up with email to save wallets across devices
+- 👛 **Multi-Wallet Support** - Manage multiple wallets with custom names
 - 🚰 **Devnet Airdrop** - Get free test SOL with one click
 - 📤 **Send SOL** - Transfer devnet SOL to any address
 - 📥 **Receive SOL** - Display your address for receiving tokens
 - 📜 **Transaction History** - View recent transactions with Explorer links
-- 🔐 **Local Storage** - Wallet persists in your browser (encrypted)
+- 🔐 **Secure Storage** - Encrypted wallets stored locally or in database
+- 📊 **Analytics** - Track signups and user activity (admin)
 - 🎨 **Beautiful UI** - Dark theme with Solana gradient accents
 
 ## Architecture
@@ -22,14 +25,21 @@ The devnet-only Solana wallet. **Real testing. Fake SOL.**
 fakesol/
 ├── src/                 # React Frontend (Vite)
 │   ├── components/      # Reusable UI components
-│   ├── pages/           # Dashboard, Send, Receive, etc.
+│   ├── pages/           # Dashboard, Send, Receive, Login, Register
 │   ├── lib/             # Solana SDK & API client
-│   └── store/           # Zustand state management
+│   └── store/           # Zustand state management (auth + wallet)
 ├── server/              # Express Backend API
 │   └── src/
 │       ├── index.ts     # Server entry point
-│       ├── routes.ts    # API endpoints
+│       ├── routes.ts    # Wallet API endpoints
+│       ├── routes/
+│       │   ├── auth.ts  # Authentication endpoints
+│       │   └── admin.ts # Admin analytics endpoints
+│       ├── lib/
+│       │   └── prisma.ts # Database client
 │       └── solana.ts    # Solana RPC wrapper
+│   └── prisma/
+│       └── schema.prisma # Database schema
 └── public/              # Static assets
 ```
 
@@ -99,6 +109,7 @@ solana airdrop 1
 
 The backend server provides these REST endpoints:
 
+### Wallet API
 | Endpoint | Method | Description |
 |----------|--------|-------------|
 | `/api/health` | GET | Health check & cluster info |
@@ -109,6 +120,25 @@ The backend server provides these REST endpoints:
 | `/api/wallet/:address/transactions` | GET | Get transaction history |
 | `/api/transaction/:signature` | GET | Get transaction details |
 | `/api/transaction/send` | POST | Send SOL transaction |
+
+### Auth API
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/auth/register` | POST | Register new user |
+| `/api/auth/login` | POST | Login user |
+| `/api/auth/logout` | POST | Logout user |
+| `/api/auth/me` | GET | Get current user |
+| `/api/auth/wallets` | POST | Create new wallet |
+| `/api/auth/wallets/:id` | PATCH | Rename wallet |
+| `/api/auth/wallets/:id` | DELETE | Delete wallet |
+| `/api/auth/wallets/import` | POST | Import wallet |
+
+### Admin API
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/admin/signups` | GET | Get signup analytics |
+| `/api/admin/events` | GET | Get event analytics |
+| `/api/admin/emails` | GET | Export user emails |
 
 ## Tech Stack
 
@@ -123,6 +153,9 @@ The backend server provides these REST endpoints:
 ### Backend
 - **Express** - Node.js Web Framework
 - **TypeScript** - Type Safety
+- **Prisma** - Database ORM
+- **PostgreSQL** - Database
+- **JWT** - Authentication
 - **@solana/web3.js** - Solana SDK
 - **express-rate-limit** - Rate limiting
 
@@ -130,15 +163,27 @@ The backend server provides these REST endpoints:
 
 ### Frontend (.env)
 ```bash
-VITE_API_URL=http://localhost:3001/api
-VITE_USE_API=false  # Set to 'true' to use backend
+VITE_API_URL=http://localhost:3001
 ```
 
 ### Backend (server/.env)
 ```bash
+# Solana
 SOLANA_RPC_URL=https://api.devnet.solana.com
+
+# Server
 PORT=3001
-AIRDROP_COOLDOWN_MS=60000
+NODE_ENV=development
+
+# Database
+DATABASE_URL=postgresql://postgres:postgres@localhost:5432/fakesol
+
+# Auth
+JWT_SECRET=your-super-secret-jwt-key-change-in-production
+ENCRYPTION_KEY=your-32-character-encryption-key!
+
+# Admin
+ADMIN_API_KEY=your-admin-api-key-change-in-production
 ```
 
 ## ⚠️ Important

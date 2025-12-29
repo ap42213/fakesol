@@ -1,7 +1,9 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useWalletStore } from '../store/walletStore';
+import { useAuthStore } from '../store/authStore';
 import { Icons, Badge } from './ui/index';
 import { WalletSwitcher } from './WalletSwitcher';
+import { FiLogOut, FiUser } from 'react-icons/fi';
 
 const TokenIcon = (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -16,7 +18,7 @@ const ExploreIcon = (
 );
 
 const navItems = [
-  { path: '/', label: 'Dashboard', icon: Icons.wallet },
+  { path: '/dashboard', label: 'Dashboard', icon: Icons.wallet },
   { path: '/send', label: 'Send', icon: Icons.send },
   { path: '/receive', label: 'Receive', icon: Icons.receive },
   { path: '/tokens', label: 'Tokens', icon: TokenIcon },
@@ -27,9 +29,26 @@ const navItems = [
 
 export function Sidebar() {
   const location = useLocation();
-  const { publicKey, balance } = useWalletStore();
+  const navigate = useNavigate();
+  const { publicKey: guestPublicKey, balance: guestBalance, disconnect: guestDisconnect } = useWalletStore();
+  const { user, wallets, logout, getActiveWallet } = useAuthStore();
 
   const isActive = (path: string) => location.pathname === path;
+  
+  // Determine which wallet/balance to show
+  const isAuthenticated = !!user;
+  const activeWallet = isAuthenticated ? getActiveWallet() : null;
+  const displayPublicKey = activeWallet?.publicKey || guestPublicKey;
+  const displayBalance = guestBalance; // Balance is always from guestBalance for now
+
+  const handleLogout = async () => {
+    if (isAuthenticated) {
+      await logout();
+    } else {
+      guestDisconnect();
+    }
+    navigate('/');
+  };
 
   return (
     <>
@@ -49,11 +68,23 @@ export function Sidebar() {
         </div>
 
         {/* Wallet Switcher */}
-        {publicKey && (
+        {displayPublicKey && (
           <div className="px-3 py-4 border-b border-zinc-800/50 relative">
-            <WalletSwitcher />
+            {isAuthenticated ? (
+              <div className="px-3">
+                <div className="flex items-center gap-2 mb-1">
+                  <FiUser className="w-4 h-4 text-purple-400" />
+                  <span className="text-sm text-zinc-300 truncate">{user?.email}</span>
+                </div>
+                <div className="text-xs text-zinc-500">
+                  {wallets.length} wallet{wallets.length !== 1 ? 's' : ''}
+                </div>
+              </div>
+            ) : (
+              <WalletSwitcher />
+            )}
             <div className="mt-3 px-3 flex items-baseline gap-1">
-              <span className="text-xl font-bold text-white">{balance.toFixed(4)}</span>
+              <span className="text-xl font-bold text-white">{displayBalance.toFixed(4)}</span>
               <span className="text-sm text-zinc-400">SOL</span>
             </div>
           </div>
@@ -80,7 +111,7 @@ export function Sidebar() {
         </nav>
 
         {/* Network Status */}
-        <div className="px-4 py-4 border-t border-zinc-800/50">
+        <div className="px-4 py-4 border-t border-zinc-800/50 space-y-3">
           <div className="flex items-center justify-between text-sm">
             <div className="flex items-center gap-2">
               <span className="w-2 h-2 bg-green-500 rounded-full status-dot" />
@@ -88,6 +119,15 @@ export function Sidebar() {
             </div>
             <span className="text-zinc-500">Devnet</span>
           </div>
+          
+          {/* Logout button */}
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm text-zinc-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+          >
+            <FiLogOut className="w-4 h-4" />
+            {isAuthenticated ? 'Sign Out' : 'Disconnect'}
+          </button>
         </div>
       </aside>
 

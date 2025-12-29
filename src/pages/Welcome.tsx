@@ -1,9 +1,11 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useWalletStore } from '../store/walletStore';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { Icons, Badge, Modal } from '../components/ui/index';
+import { FiLogIn, FiUserPlus } from 'react-icons/fi';
 
 export function Welcome() {
   const [mode, setMode] = useState<'home' | 'import'>('home');
@@ -99,18 +101,52 @@ export function Welcome() {
 
             {/* Actions */}
             <div className="space-y-3">
+              {/* Auth Options */}
+              <div className="flex gap-3 mb-2">
+                <Link to="/login" className="flex-1">
+                  <Button
+                    variant="primary"
+                    size="lg"
+                    fullWidth
+                  >
+                    <FiLogIn className="w-4 h-4 mr-2" />
+                    Sign In
+                  </Button>
+                </Link>
+                <Link to="/register" className="flex-1">
+                  <Button
+                    variant="secondary"
+                    size="lg"
+                    fullWidth
+                  >
+                    <FiUserPlus className="w-4 h-4 mr-2" />
+                    Sign Up
+                  </Button>
+                </Link>
+              </div>
+
+              <div className="relative my-4">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-zinc-700"></div>
+                </div>
+                <div className="relative flex justify-center text-sm">
+                  <span className="px-3 bg-zinc-950 text-zinc-500">or continue without account</span>
+                </div>
+              </div>
+
               <Button
                 size="xl"
                 fullWidth
                 onClick={handleCreate}
                 icon={Icons.plus}
+                variant="ghost"
               >
-                Create New Wallet
+                Create Guest Wallet
               </Button>
               
               <Button
-                variant="secondary"
-                size="xl"
+                variant="ghost"
+                size="lg"
                 fullWidth
                 onClick={() => setMode('import')}
                 icon={Icons.key}
@@ -119,19 +155,23 @@ export function Welcome() {
               </Button>
             </div>
 
-            {/* Features */}
-            <div className="mt-8 grid grid-cols-3 gap-4 text-center">
-              {[
-                { icon: '🚰', label: 'Free Airdrop' },
-                { icon: '🔒', label: 'Secure' },
-                { icon: '⚡', label: 'Fast' },
-              ].map((feature) => (
-                <div key={feature.label} className="p-3">
-                  <span className="text-2xl mb-2 block">{feature.icon}</span>
-                  <span className="text-xs text-zinc-500">{feature.label}</span>
-                </div>
-              ))}
-            </div>
+            {/* Benefits of signing up */}
+            <Card variant="glass" className="mt-6 p-4">
+              <p className="text-xs text-zinc-400 text-center mb-3">
+                ✨ Benefits of creating an account:
+              </p>
+              <ul className="text-xs text-zinc-500 space-y-1">
+                <li className="flex items-center gap-2">
+                  <span className="text-green-400">✓</span> Access wallets from any device
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-green-400">✓</span> No need to save private keys
+                </li>
+                <li className="flex items-center gap-2">
+                  <span className="text-green-400">✓</span> Manage multiple wallets easily
+                </li>
+              </ul>
+            </Card>
           </>
         ) : (
           <>

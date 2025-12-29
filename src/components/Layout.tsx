@@ -1,12 +1,8 @@
-import { ReactNode } from 'react';
+import { Outlet } from 'react-router-dom';
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 
-interface LayoutProps {
-  children: ReactNode;
-}
-
-export function Layout({ children }: LayoutProps) {
+export function Layout() {
   return (
     <div className="min-h-screen bg-zinc-950 flex">
       {/* Sidebar - Desktop */}
@@ -18,7 +14,7 @@ export function Layout({ children }: LayoutProps) {
         
         <main className="flex-1 p-4 lg:p-8">
           <div className="max-w-4xl mx-auto animate-fade-in">
-            {children}
+            <Outlet />
           </div>
         </main>
 

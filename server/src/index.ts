@@ -1,10 +1,13 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import routes from './routes.js';
+import authRoutes from './routes/auth.js';
+import adminRoutes from './routes/admin.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -21,6 +24,7 @@ app.use(cors({
   credentials: true,
 }));
 app.use(express.json());
+app.use(cookieParser());
 
 // Global rate limiting
 const limiter = rateLimit({
@@ -29,6 +33,12 @@ const limiter = rateLimit({
   message: { error: 'Too many requests', message: 'Please slow down' },
 });
 app.use(limiter);
+
+// Auth Routes
+app.use('/api/auth', authRoutes);
+
+// Admin Routes
+app.use('/api/admin', adminRoutes);
 
 // API Routes
 app.use('/api', routes);
