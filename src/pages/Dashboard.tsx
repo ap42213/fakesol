@@ -1,0 +1,240 @@
+import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
+import { useWalletStore } from '../store/walletStore';
+import { Button } from '../components/ui/Button';
+import { Card } from '../components/ui/Card';
+import { Icons, Badge, CopyButton, useToast } from '../components/ui/index';
+import { shortenAddress } from '../lib/solana';
+
+export function Dashboard() {
+  const { 
+    publicKey, 
+    balance, 
+    transactions,
+    isLoading, 
+    error,
+    refreshBalance, 
+    requestAirdrop,
+    fetchTransactions,
+    clearError 
+  } = useWalletStore();
+  
+  const { showToast } = useToast();
+  const [airdropLoading, setAirdropLoading] = useState(false);
+
+  useEffect(() => {
+    refreshBalance();
+    fetchTransactions();
+    const interval = setInterval(refreshBalance, 30000);
+    return () => clearInterval(interval);
+  }, [refreshBalance, fetchTransactions]);
+
+  const handleAirdrop = async () => {
+    setAirdropLoading(true);
+    clearError();
+    try {
+      await requestAirdrop(1);
+      showToast('Airdrop successful! +1 SOL', 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Airdrop failed', 'error');
+    } finally {
+      setAirdropLoading(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6 pb-20 lg:pb-0">
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+          <p className="text-zinc-500">Manage your devnet wallet</p>
+        </div>
+        <Button
+          variant="ghost"
+          onClick={() => refreshBalance()}
+          loading={isLoading}
+        >
+          {Icons.refresh}
+          <span className="hidden sm:inline">Refresh</span>
+        </Button>
+      </div>
+
+      {/* Balance Card */}
+      <Card variant="gradient" padding="lg">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+          <div>
+            <p className="text-zinc-400 text-sm mb-2">Total Balance</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-5xl font-extrabold text-white number-animate">
+                {isLoading && balance === 0 ? '...' : balance.toFixed(4)}
+              </span>
+              <span className="text-2xl text-zinc-400">SOL</span>
+            </div>
+            <p className="text-zinc-500 text-sm mt-2">
+              ≈ $0.00 USD <Badge variant="warning">No real value</Badge>
+            </p>
+          </div>
+          
+          <div className="flex gap-3">
+            <Button
+              variant="success"
+              size="lg"
+              onClick={handleAirdrop}
+              loading={airdropLoading}
+              icon={Icons.droplet}
+            >
+              Airdrop
+            </Button>
+          </div>
+        </div>
+      </Card>
+
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3">
+          <svg className="w-5 h-5 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+          </svg>
+          <p className="text-red-400 text-sm flex-1">{error}</p>
+          <button onClick={clearError} className="text-red-400 hover:text-red-300">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      )}
+
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 gap-4">
+        <Link to="/send">
+          <Card variant="interactive" padding="md" className="h-full">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-purple-500/10 rounded-xl text-purple-400">
+                {Icons.send}
+              </div>
+              <div>
+                <p className="font-semibold text-white">Send</p>
+                <p className="text-sm text-zinc-500">Transfer SOL</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
+        
+        <Link to="/receive">
+          <Card variant="interactive" padding="md" className="h-full">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-green-500/10 rounded-xl text-green-400">
+                {Icons.receive}
+              </div>
+              <div>
+                <p className="font-semibold text-white">Receive</p>
+                <p className="text-sm text-zinc-500">Get SOL</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
+      </div>
+
+      {/* Wallet Address */}
+      <Card variant="glass" padding="md">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-cyan-400 flex-shrink-0" />
+            <div className="min-w-0">
+              <p className="text-zinc-400 text-xs mb-0.5">Your Address</p>
+              <p className="text-white font-mono text-sm truncate">
+                {publicKey}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <CopyButton text={publicKey || ''} />
+            <a
+              href={`https://explorer.solana.com/address/${publicKey}?cluster=devnet`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-all"
+            >
+              {Icons.external}
+            </a>
+          </div>
+        </div>
+      </Card>
+
+      {/* Recent Activity */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-white">Recent Activity</h2>
+          <Link to="/transactions" className="text-sm text-purple-400 hover:text-purple-300">
+            View All →
+          </Link>
+        </div>
+        
+        {transactions.length === 0 ? (
+          <Card variant="glass" padding="lg" className="text-center">
+            <div className="text-zinc-500">
+              <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-3">
+                {Icons.history}
+              </div>
+              <p>No transactions yet</p>
+              <p className="text-sm mt-1">Request an airdrop to get started!</p>
+            </div>
+          </Card>
+        ) : (
+          <div className="space-y-2">
+            {transactions.slice(0, 3).map((tx) => (
+              <a
+                key={tx.signature}
+                href={`https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Card variant="interactive" padding="sm">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      tx.err ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'
+                    }`}>
+                      {tx.err ? '✕' : '✓'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-mono text-white truncate">
+                        {shortenAddress(tx.signature, 8)}
+                      </p>
+                      <p className="text-xs text-zinc-500">
+                        {tx.blockTime 
+                          ? new Date(tx.blockTime * 1000).toLocaleString()
+                          : 'Pending...'}
+                      </p>
+                    </div>
+                    <Badge variant={tx.err ? 'error' : 'success'}>
+                      {tx.err ? 'Failed' : 'Success'}
+                    </Badge>
+                  </div>
+                </Card>
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Info Card */}
+      <Card variant="glass" padding="md">
+        <div className="flex items-start gap-4">
+          <div className="p-2 bg-blue-500/10 rounded-xl text-blue-400 flex-shrink-0">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm text-zinc-300 font-medium">About Devnet</p>
+            <p className="text-sm text-zinc-500 mt-1">
+              Solana Devnet is a testing network where you can experiment with dApps risk-free. 
+              SOL on devnet has no real value and can be obtained freely via airdrops.
+            </p>
+          </div>
+        </div>
+      </Card>
+    </div>
+  );
+}
