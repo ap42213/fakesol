@@ -39,6 +39,12 @@ function ClerkApp() {
     <ToastProvider>
       <BrowserRouter>
         <Routes>
+          {/* Public landing */}
+          <Route
+            path="/"
+            element={hasWallet ? <Navigate to="/dashboard" replace /> : <Welcome />}
+          />
+
           {/* Auth page */}
           <Route
             path="/login"
@@ -69,7 +75,6 @@ function ClerkApp() {
           
           {/* Protected routes */}
           <Route element={<Layout />}>
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard" element={
               hasWallet ? <Dashboard /> : <Navigate to="/login" replace />
             } />

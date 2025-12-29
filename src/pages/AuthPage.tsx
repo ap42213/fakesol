@@ -1,64 +1,42 @@
 import { SignIn, SignUp } from '@clerk/clerk-react';
-import { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { FaWallet } from 'react-icons/fa';
+import { Link } from 'react-router-dom';
 
 type AuthMode = 'sign-in' | 'sign-up';
 
 export function AuthPage({ initialMode }: { initialMode?: AuthMode }) {
-  const location = useLocation();
-  const [mode, setMode] = useState<AuthMode>(initialMode ?? 'sign-in');
-
-  useEffect(() => {
-    if (initialMode) {
-      setMode(initialMode);
-      return;
-    }
-
-    // Support legacy hash-based navigation from Clerk links.
-    if (location.hash.includes('sign-up')) {
-      setMode('sign-up');
-    } else if (location.hash.includes('sign-in')) {
-      setMode('sign-in');
-    }
-  }, [initialMode, location.hash]);
+  const mode: AuthMode = initialMode ?? 'sign-in';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-purple-900 to-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-background-lighter p-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center gap-3 text-3xl font-bold">
-            <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-pink-500 rounded-xl flex items-center justify-center">
-              <FaWallet className="text-white text-xl" />
-            </div>
-            <span className="bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
-              FakeSol
-            </span>
+          <Link to="/" className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary mb-4">
+            <span className="text-3xl font-bold text-white">F</span>
           </Link>
-          <p className="text-gray-400 mt-2">Solana Devnet Wallet</p>
+          <h1 className="text-2xl font-bold gradient-text">
+            {mode === 'sign-in' ? 'Welcome Back' : 'Create Account'}
+          </h1>
+          <p className="text-text-muted mt-2">
+            {mode === 'sign-in' ? 'Sign in to access your wallets' : 'Sign up to save your wallets securely'}
+          </p>
         </div>
 
-        {/* Clerk Auth Component */}
-        <div className="flex justify-center">
+        <div className="card-glass p-8">
           {mode === 'sign-in' ? (
-            <SignIn 
+            <SignIn
               appearance={{
                 elements: {
                   rootBox: 'w-full',
-                  card: 'bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl',
-                  headerTitle: 'text-white',
-                  headerSubtitle: 'text-gray-300',
-                  socialButtonsBlockButton: 'bg-white/10 border-white/20 text-white hover:bg-white/20',
+                  card: 'bg-transparent border-0 shadow-none p-0 w-full',
+                  header: 'hidden',
+                  socialButtonsBlockButton: 'bg-white/10 border border-white/20 text-white hover:bg-white/20',
                   socialButtonsBlockButtonText: 'text-white',
-                  dividerLine: 'bg-white/20',
-                  dividerText: 'text-gray-400',
-                  formFieldLabel: 'text-gray-300',
-                  formFieldInput: 'bg-white/10 border-white/20 text-white',
-                  formButtonPrimary: 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600',
-                  footerActionLink: 'text-purple-400 hover:text-purple-300',
-                  identityPreviewText: 'text-white',
-                  identityPreviewEditButton: 'text-purple-400',
+                  dividerLine: 'bg-white/10',
+                  dividerText: 'text-text-muted',
+                  formFieldLabel: 'text-text-secondary',
+                  formFieldInput: 'bg-white/5 border border-white/10 text-white rounded-xl',
+                  formButtonPrimary: 'btn-primary w-full py-3 text-base',
+                  footerActionLink: 'text-primary hover:text-primary-light transition-colors',
                 },
               }}
               routing="hash"
@@ -66,21 +44,20 @@ export function AuthPage({ initialMode }: { initialMode?: AuthMode }) {
               afterSignInUrl="/dashboard"
             />
           ) : (
-            <SignUp 
+            <SignUp
               appearance={{
                 elements: {
                   rootBox: 'w-full',
-                  card: 'bg-white/10 backdrop-blur-lg border border-white/20 shadow-2xl',
-                  headerTitle: 'text-white',
-                  headerSubtitle: 'text-gray-300',
-                  socialButtonsBlockButton: 'bg-white/10 border-white/20 text-white hover:bg-white/20',
+                  card: 'bg-transparent border-0 shadow-none p-0 w-full',
+                  header: 'hidden',
+                  socialButtonsBlockButton: 'bg-white/10 border border-white/20 text-white hover:bg-white/20',
                   socialButtonsBlockButtonText: 'text-white',
-                  dividerLine: 'bg-white/20',
-                  dividerText: 'text-gray-400',
-                  formFieldLabel: 'text-gray-300',
-                  formFieldInput: 'bg-white/10 border-white/20 text-white',
-                  formButtonPrimary: 'bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600',
-                  footerActionLink: 'text-purple-400 hover:text-purple-300',
+                  dividerLine: 'bg-white/10',
+                  dividerText: 'text-text-muted',
+                  formFieldLabel: 'text-text-secondary',
+                  formFieldInput: 'bg-white/5 border border-white/10 text-white rounded-xl',
+                  formButtonPrimary: 'btn-primary w-full py-3 text-base',
+                  footerActionLink: 'text-primary hover:text-primary-light transition-colors',
                 },
               }}
               routing="hash"
@@ -88,42 +65,44 @@ export function AuthPage({ initialMode }: { initialMode?: AuthMode }) {
               afterSignUpUrl="/dashboard"
             />
           )}
-        </div>
 
-        {/* Toggle */}
-        <div className="text-center mt-6">
-          {mode === 'sign-in' ? (
-            <p className="text-gray-400">
-              Don't have an account?{' '}
-              <button 
-                onClick={() => setMode('sign-up')}
-                className="text-purple-400 hover:text-purple-300 font-medium"
-              >
-                Sign up
-              </button>
+          <div className="mt-6 text-center">
+            <p className="text-text-muted">
+              {mode === 'sign-in' ? (
+                <>
+                  Don't have an account?{' '}
+                  <Link to="/register" className="text-primary hover:text-primary-light transition-colors">
+                    Create one
+                  </Link>
+                </>
+              ) : (
+                <>
+                  Already have an account?{' '}
+                  <Link to="/login" className="text-primary hover:text-primary-light transition-colors">
+                    Sign in
+                  </Link>
+                </>
+              )}
             </p>
-          ) : (
-            <p className="text-gray-400">
-              Already have an account?{' '}
-              <button 
-                onClick={() => setMode('sign-in')}
-                className="text-purple-400 hover:text-purple-300 font-medium"
-              >
-                Sign in
-              </button>
-            </p>
-          )}
-        </div>
+          </div>
 
-        {/* Guest mode link */}
-        <div className="text-center mt-4">
-          <Link 
-            to="/"
-            className="text-gray-500 hover:text-gray-400 text-sm"
-          >
-            ← Back to home
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-white/10"></div>
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-4 bg-background-card text-text-muted">or</span>
+            </div>
+          </div>
+
+          <Link to="/" className="btn-secondary w-full flex items-center justify-center gap-2">
+            Back to home
           </Link>
         </div>
+
+        <p className="text-center text-text-muted text-sm mt-6">
+          FakeSOL is for Solana Devnet only. No real funds.
+        </p>
       </div>
     </div>
   );
