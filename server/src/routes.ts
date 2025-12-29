@@ -23,8 +23,22 @@ const router = Router();
 const airdropCooldowns = new Map<string, number>();
 const AIRDROP_COOLDOWN = parseInt(process.env.AIRDROP_COOLDOWN_MS || '60000');
 
-// Health check / cluster info
+// Health check - simple and fast for Railway healthcheck
 router.get('/health', async (_req: Request, res: Response) => {
+  try {
+    // Quick health check - don't call Solana RPC as it can timeout
+    res.json({ 
+      status: 'ok', 
+      timestamp: new Date().toISOString(),
+      cluster: 'devnet',
+    });
+  } catch (error: any) {
+    res.status(500).json({ error: 'Health check failed', message: error.message });
+  }
+});
+
+// Detailed cluster info (separate from health check)
+router.get('/cluster', async (_req: Request, res: Response) => {
   try {
     const info = await getClusterInfo();
     res.json({ status: 'ok', ...info });
