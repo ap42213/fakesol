@@ -1,7 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import { useWalletStore } from '../store/walletStore';
-import { shortenAddress } from '../lib/solana';
 import { Icons, Badge } from './ui/index';
+import { WalletSwitcher } from './WalletSwitcher';
 
 const TokenIcon = (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -48,18 +48,13 @@ export function Sidebar() {
           </Link>
         </div>
 
-        {/* Wallet Info */}
+        {/* Wallet Switcher */}
         {publicKey && (
-          <div className="px-4 py-4 border-b border-zinc-800/50">
-            <div className="glass-card p-4">
-              <p className="text-xs text-zinc-500 mb-1">Wallet</p>
-              <p className="font-mono text-sm text-zinc-300 mb-2">
-                {shortenAddress(publicKey, 6)}
-              </p>
-              <div className="flex items-baseline gap-1">
-                <span className="text-xl font-bold text-white">{balance.toFixed(4)}</span>
-                <span className="text-sm text-zinc-400">SOL</span>
-              </div>
+          <div className="px-3 py-4 border-b border-zinc-800/50 relative">
+            <WalletSwitcher />
+            <div className="mt-3 px-3 flex items-baseline gap-1">
+              <span className="text-xl font-bold text-white">{balance.toFixed(4)}</span>
+              <span className="text-sm text-zinc-400">SOL</span>
             </div>
           </div>
         )}
