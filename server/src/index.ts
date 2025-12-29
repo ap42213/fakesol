@@ -33,44 +33,6 @@ app.use(limiter);
 // API Routes
 app.use('/api', routes);
 
-// Root endpoint
-app.get('/', (_req, res) => {
-  res.json({
-    name: 'FakeSOL API',
-    version: '0.3.0',
-    description: 'Backend API for FakeSOL devnet wallet',
-    network: 'Solana Devnet',
-    endpoints: {
-      // Health & Info
-      health: 'GET /api/health',
-      performance: 'GET /api/performance',
-      blockhash: 'GET /api/blockhash',
-      rentExemption: 'GET /api/rent-exemption',
-      // Wallet Operations
-      generateWallet: 'POST /api/wallet/generate',
-      validateAddress: 'GET /api/wallet/validate/:address',
-      getBalance: 'GET /api/wallet/:address/balance',
-      requestAirdrop: 'POST /api/wallet/:address/airdrop',
-      getTransactions: 'GET /api/wallet/:address/transactions',
-      // Token Operations
-      getTokens: 'GET /api/wallet/:address/tokens',
-      getTokenBalance: 'GET /api/wallet/:address/token/:mint',
-      // Account Info
-      getAccountInfo: 'GET /api/account/:address',
-      // Transactions
-      getTransaction: 'GET /api/transaction/:signature',
-      getTransactionInfo: 'GET /api/transaction/:signature/info',
-      sendTransaction: 'POST /api/transaction/send',
-    },
-  });
-});
-
-// Error handler
-app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error('Error:', err);
-  res.status(500).json({ error: 'Internal server error', message: err.message });
-});
-
 // Serve static frontend in production
 if (isProduction) {
   const publicPath = path.join(__dirname, '..', 'public');
@@ -80,7 +42,40 @@ if (isProduction) {
   app.get('*', (_req, res) => {
     res.sendFile(path.join(publicPath, 'index.html'));
   });
+} else {
+  // Development only: API docs at root
+  app.get('/', (_req, res) => {
+    res.json({
+      name: 'FakeSOL API',
+      version: '0.3.0',
+      description: 'Backend API for FakeSOL devnet wallet',
+      network: 'Solana Devnet',
+      endpoints: {
+        health: 'GET /api/health',
+        performance: 'GET /api/performance',
+        blockhash: 'GET /api/blockhash',
+        rentExemption: 'GET /api/rent-exemption',
+        generateWallet: 'POST /api/wallet/generate',
+        validateAddress: 'GET /api/wallet/validate/:address',
+        getBalance: 'GET /api/wallet/:address/balance',
+        requestAirdrop: 'POST /api/wallet/:address/airdrop',
+        getTransactions: 'GET /api/wallet/:address/transactions',
+        getTokens: 'GET /api/wallet/:address/tokens',
+        getTokenBalance: 'GET /api/wallet/:address/token/:mint',
+        getAccountInfo: 'GET /api/account/:address',
+        getTransaction: 'GET /api/transaction/:signature',
+        getTransactionInfo: 'GET /api/transaction/:signature/info',
+        sendTransaction: 'POST /api/transaction/send',
+      },
+    });
+  });
 }
+
+// Error handler
+app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+  console.error('Error:', err);
+  res.status(500).json({ error: 'Internal server error', message: err.message });
+});
 
 // Start server
 app.listen(PORT, () => {
