@@ -8,7 +8,9 @@ const globalForPrisma = globalThis as unknown as {
 let prismaClient: PrismaClient | null = null;
 
 if (process.env.DATABASE_URL) {
-  prismaClient = globalForPrisma.prisma ?? new PrismaClient();
+  prismaClient = globalForPrisma.prisma ?? new PrismaClient({
+    datasourceUrl: process.env.DATABASE_URL,
+  });
   
   if (process.env.NODE_ENV !== 'production') {
     globalForPrisma.prisma = prismaClient;
