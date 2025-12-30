@@ -243,7 +243,7 @@ export default function App() {
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       const conn = getConnection();
       try {
-        const signature = await conn.requestAirdrop(pubKey, 1 * LAMPORTS_PER_SOL);
+        const signature = await conn.requestAirdrop(pubKey, 5 * LAMPORTS_PER_SOL);
         // Confirm directly on signature to avoid blockhash mismatch issues
         await conn.confirmTransaction(signature, 'confirmed');
 
