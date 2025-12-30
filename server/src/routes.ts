@@ -16,8 +16,54 @@ import {
   getTokenAccounts,
   getTokenBalance,
 } from './solana.js';
+import fs from 'fs';
+import path from 'path';
 
 const router = Router();
+
+// Simple JSON persistence for featured/tester projects
+const PROJECTS_PATH = path.join(process.cwd(), 'data', 'projects.json');
+
+type StoredProject = {
+  id: string;
+  name: string;
+  description: string;
+  category: 'defi' | 'nft' | 'tool' | 'game' | 'dao';
+  url: string;
+  tags: string[];
+  featured?: boolean;
+  lookingForTesters?: boolean;
+  incentive?: string;
+  startsAt?: string;
+  endsAt?: string;
+  tasks?: string[];
+  contact?: string;
+};
+
+function ensureProjectsFile() {
+  const dir = path.dirname(PROJECTS_PATH);
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+  if (!fs.existsSync(PROJECTS_PATH)) {
+    fs.writeFileSync(PROJECTS_PATH, JSON.stringify([], null, 2));
+  }
+}
+
+function readProjects(): StoredProject[] {
+  try {
+    ensureProjectsFile();
+    const raw = fs.readFileSync(PROJECTS_PATH, 'utf-8');
+    const data = JSON.parse(raw);
+    if (Array.isArray(data)) return data;
+    return [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function writeProjects(list: StoredProject[]) {
+  ensureProjectsFile();
+  fs.writeFileSync(PROJECTS_PATH, JSON.stringify(list, null, 2));
+}
 
 // Rate limiting for airdrops (track by IP)
 const airdropCooldowns = new Map<string, number>();
@@ -45,6 +91,64 @@ router.get('/cluster', async (_req: Request, res: Response) => {
   } catch (error: any) {
     res.status(500).json({ error: 'Failed to connect to Solana', message: error.message });
   }
+});
+
+// Projects (list and submit)
+router.get('/projects', async (_req: Request, res: Response) => {
+  const list = readProjects();
+  res.json({ projects: list });
+});
+
+router.post('/projects', async (req: Request, res: Response) => {
+  const {
+    name,
+    url,
+    description,
+    category = 'tool',
+    tags = [],
+    lookingForTesters = true,
+    incentive,
+    startsAt,
+    endsAt,
+    tasks = [],
+    contact,
+  } = req.body || {};
+
+  if (!name || !url || !description) {
+    return res.status(400).json({ error: 'Missing required fields', required: ['name', 'url', 'description'] });
+  }
+
+  const now = Date.now();
+  const project: StoredProject = {
+    id: `submitted-${now}`,
+    name: String(name),
+    url: String(url),
+    description: String(description),
+    category,
+    tags: Array.isArray(tags)
+      ? tags.filter((t) => typeof t === 'string' && t.trim()).map((t) => t.trim())
+      : String(tags || '')
+          .split(',')
+          .map((t) => t.trim())
+          .filter(Boolean),
+    lookingForTesters: Boolean(lookingForTesters),
+    incentive: incentive ? String(incentive) : undefined,
+    startsAt: startsAt ? String(startsAt) : undefined,
+    endsAt: endsAt ? String(endsAt) : undefined,
+    tasks: Array.isArray(tasks)
+      ? tasks.filter((t) => typeof t === 'string' && t.trim()).map((t) => t.trim())
+      : String(tasks || '')
+          .split(/[,\n]/)
+          .map((t) => t.trim())
+          .filter(Boolean),
+    contact: contact ? String(contact) : undefined,
+  };
+
+  const existing = readProjects();
+  existing.unshift(project);
+  writeProjects(existing);
+
+  res.json({ project });
 });
 
 // Generate new wallet

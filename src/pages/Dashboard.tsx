@@ -322,7 +322,7 @@ export function Dashboard() {
             >
               <div className="flex items-center justify-between mb-2">
                 <p className="text-sm font-semibold text-white truncate">{proj.name}</p>
-                <Badge variant="outline">{proj.tag}</Badge>
+                <Badge variant="default">{proj.tag}</Badge>
               </div>
               <p className="text-xs text-zinc-400 mb-2 line-clamp-2">{proj.description}</p>
               <div className="text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/30 px-2 py-1 rounded-lg inline-flex items-center gap-1">

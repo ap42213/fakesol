@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Icons, Badge } from '../components/ui/index';
+import { api } from '../lib/api';
 
 interface Project {
   id: string;
@@ -294,6 +295,7 @@ export function Explore() {
   const [sortByNew, setSortByNew] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [customProjects, setCustomProjects] = useState<Project[]>([]);
+  const [remoteProjects, setRemoteProjects] = useState<Project[]>([]);
   const [showSubmit, setShowSubmit] = useState(false);
   const [formError, setFormError] = useState<string | null>(null);
   const [form, setForm] = useState({
@@ -310,7 +312,7 @@ export function Explore() {
     endsAt: '',
   });
 
-  const allProjects = [...projects, ...customProjects];
+  const allProjects = remoteProjects.length > 0 ? [...remoteProjects, ...customProjects] : [...projects, ...customProjects];
 
   const filteredProjects = allProjects.filter((project) => {
     const matchesCategory = selectedCategory === 'all'
@@ -333,6 +335,16 @@ export function Explore() {
 
   const featuredProjects = allProjects.filter(p => p.featured);
   const testerProjects = allProjects.filter(p => p.lookingForTesters);
+
+  useEffect(() => {
+    const load = async () => {
+      const res = await api.getProjects();
+      if (!res.error && res.data?.projects) {
+        setRemoteProjects(res.data.projects as Project[]);
+      }
+    };
+    load();
+  }, []);
 
   const handleSubmitProject = () => {
     if (!form.name.trim() || !form.url.trim() || !form.description.trim()) {
@@ -366,7 +378,29 @@ export function Explore() {
       contact: form.contact || undefined,
     };
 
-    setCustomProjects((prev) => [newProject, ...prev]);
+    // Try to persist to API first
+    api.submitProject({
+      name: newProject.name,
+      url: newProject.url,
+      description: newProject.description,
+      category: newProject.category,
+      tags: newProject.tags,
+      lookingForTesters: newProject.lookingForTesters,
+      incentive: newProject.incentive,
+      startsAt: newProject.startsAt,
+      endsAt: newProject.endsAt,
+      tasks: newProject.tasks,
+      contact: newProject.contact,
+    }).then((res) => {
+      if (!res.error && res.data && res.data.project) {
+        const p = res.data.project as Project;
+        setRemoteProjects((prev) => [p, ...prev]);
+      } else {
+        setCustomProjects((prev) => [newProject, ...prev]);
+      }
+    }).catch(() => {
+      setCustomProjects((prev) => [newProject, ...prev]);
+    });
     setForm({
       name: '',
       url: '',
@@ -472,7 +506,7 @@ export function Explore() {
           <h2 className="text-lg font-semibold text-white">
             {selectedCategory === 'all' ? 'All Projects' : categories.find(c => c.id === selectedCategory)?.label}
           </h2>
-          <span a className="text-sm text-zinc-500">{sortedProjects.length} projects</span>
+          <span className="text-sm text-zinc-500">{sortedProjects.length} projects</span>
         </div>
 
         {sortedProjects.length === 0 ? (

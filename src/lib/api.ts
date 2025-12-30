@@ -129,6 +129,60 @@ export const api = {
       }>;
     }>(`/wallet/${address}/tokens`),
 
+  // Projects (tester spotlight)
+  getProjects: () =>
+    apiRequest<{
+      projects: Array<{
+        id: string;
+        name: string;
+        description: string;
+        category: 'defi' | 'nft' | 'tool' | 'game' | 'dao';
+        url: string;
+        tags: string[];
+        featured?: boolean;
+        lookingForTesters?: boolean;
+        incentive?: string;
+        startsAt?: string;
+        endsAt?: string;
+        tasks?: string[];
+        contact?: string;
+      }>;
+    }>(`/projects`),
+
+  submitProject: (payload: {
+    name: string;
+    url: string;
+    description: string;
+    category: 'defi' | 'nft' | 'tool' | 'game' | 'dao';
+    tags: string[];
+    lookingForTesters?: boolean;
+    incentive?: string;
+    startsAt?: string;
+    endsAt?: string;
+    tasks?: string[];
+    contact?: string;
+  }) =>
+    apiRequest<{
+      project: {
+        id: string;
+        name: string;
+        description: string;
+        category: 'defi' | 'nft' | 'tool' | 'game' | 'dao';
+        url: string;
+        tags: string[];
+        featured?: boolean;
+        lookingForTesters?: boolean;
+        incentive?: string;
+        startsAt?: string;
+        endsAt?: string;
+        tasks?: string[];
+        contact?: string;
+      };
+    }>(`/projects`, {
+      method: 'POST',
+      body: JSON.stringify(payload),
+    }),
+
   // Cluster info for dev tools
   getClusterInfo: () =>
     apiRequest<{
