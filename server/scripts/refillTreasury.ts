@@ -5,6 +5,11 @@ import { Connection, Keypair, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.j
 import bs58 from 'bs58';
 
 console.log('🔄 Treasury Refill Script Starting...');
+console.log(
+  `   Env: NODE_ENV=${process.env.NODE_ENV || '(unset)'} ` +
+    `RAILWAY_ENVIRONMENT_NAME=${process.env.RAILWAY_ENVIRONMENT_NAME || '(unset)'} ` +
+    `RAILWAY_SERVICE_NAME=${process.env.RAILWAY_SERVICE_NAME || '(unset)'}`,
+);
 
 const RPC = (process.env.SOLANA_RPC_URLS || process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com')
   .split(',')
@@ -21,6 +26,13 @@ const chooseRpc = (() => {
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const getTreasuryPubkey = (): PublicKey => {
+  const hasTreasuryPubkey = Boolean(process.env.TREASURY_PUBLIC_KEY?.trim());
+  const hasTreasurySecret = Boolean(process.env.TREASURY_SECRET_KEY?.trim());
+  console.log(
+    `   Env check: TREASURY_PUBLIC_KEY=${hasTreasuryPubkey ? 'set' : 'missing'} ` +
+      `TREASURY_SECRET_KEY=${hasTreasurySecret ? 'set' : 'missing'}`,
+  );
+
   if (process.env.TREASURY_PUBLIC_KEY) {
     console.log(`   Using TREASURY_PUBLIC_KEY`);
     return new PublicKey(process.env.TREASURY_PUBLIC_KEY);
@@ -28,6 +40,9 @@ const getTreasuryPubkey = (): PublicKey => {
   const secret = process.env.TREASURY_SECRET_KEY;
   if (!secret) {
     console.error('❌ TREASURY_PUBLIC_KEY or TREASURY_SECRET_KEY required');
+    console.error(
+      '   Railway tip: variables are scoped per service + environment. Add TREASURY_SECRET_KEY to the CRON service Variables tab (Production environment), or set it as a Shared Variable.',
+    );
     process.exit(1);
   }
   console.log(`   Using TREASURY_SECRET_KEY`);
