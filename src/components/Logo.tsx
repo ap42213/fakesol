@@ -16,7 +16,7 @@ export function Logo({ size = 'md', className = '' }: LogoProps) {
     <img 
       src="/fakesol-logo.png" 
       alt="FakeSOL Logo" 
-      className={`${sizeClasses[size]} object-contain ${className}`} 
+      className={`${sizeClasses[size]} object-contain mix-blend-screen ${className}`} 
     />
   );
 }
