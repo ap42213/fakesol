@@ -12,6 +12,12 @@ interface Project {
   logo?: string;
   tags: string[];
   featured?: boolean;
+  lookingForTesters?: boolean;
+  incentive?: string;
+  startsAt?: string;
+  endsAt?: string;
+  tasks?: string[];
+  contact?: string;
 }
 
 const projects: Project[] = [
@@ -23,6 +29,7 @@ const projects: Project[] = [
     url: 'https://faucet.solana.com/',
     tags: ['Faucet', 'Essential'],
     featured: true,
+    lookingForTesters: false,
   },
   {
     id: '2',
@@ -31,6 +38,7 @@ const projects: Project[] = [
     category: 'tool',
     url: 'https://solfaucet.com/',
     tags: ['Faucet', 'Alternative'],
+    lookingForTesters: false,
   },
   {
     id: '3',
@@ -40,6 +48,7 @@ const projects: Project[] = [
     url: 'https://explorer.solana.com/?cluster=devnet',
     tags: ['Explorer', 'Essential'],
     featured: true,
+    lookingForTesters: false,
   },
   {
     id: '4',
@@ -48,6 +57,7 @@ const projects: Project[] = [
     category: 'tool',
     url: 'https://solscan.io/?cluster=devnet',
     tags: ['Explorer', 'Analytics'],
+    lookingForTesters: false,
   },
   {
     id: '5',
@@ -57,6 +67,7 @@ const projects: Project[] = [
     url: 'https://beta.solpg.io/',
     tags: ['IDE', 'Development'],
     featured: true,
+    lookingForTesters: false,
   },
   {
     id: '6',
@@ -65,6 +76,7 @@ const projects: Project[] = [
     category: 'nft',
     url: 'https://www.metaplex.com/',
     tags: ['NFT', 'Marketplace'],
+    lookingForTesters: false,
   },
   {
     id: '7',
@@ -73,6 +85,7 @@ const projects: Project[] = [
     category: 'defi',
     url: 'https://www.orca.so/',
     tags: ['DEX', 'Swap'],
+    lookingForTesters: false,
   },
   {
     id: '8',
@@ -81,6 +94,7 @@ const projects: Project[] = [
     category: 'defi',
     url: 'https://raydium.io/',
     tags: ['AMM', 'DeFi'],
+    lookingForTesters: false,
   },
   {
     id: '9',
@@ -90,6 +104,7 @@ const projects: Project[] = [
     url: 'https://jup.ag/',
     tags: ['Aggregator', 'Swap'],
     featured: true,
+    lookingForTesters: false,
   },
   {
     id: '10',
@@ -98,6 +113,7 @@ const projects: Project[] = [
     category: 'tool',
     url: 'https://phantom.app/',
     tags: ['Wallet', 'Essential'],
+    lookingForTesters: false,
   },
   {
     id: '11',
@@ -106,6 +122,7 @@ const projects: Project[] = [
     category: 'tool',
     url: 'https://solanacookbook.com/',
     tags: ['Docs', 'Learning'],
+    lookingForTesters: false,
   },
   {
     id: '12',
@@ -114,6 +131,7 @@ const projects: Project[] = [
     category: 'dao',
     url: 'https://realms.today/',
     tags: ['DAO', 'Governance'],
+    lookingForTesters: false,
   },
   {
     id: '13',
@@ -122,6 +140,7 @@ const projects: Project[] = [
     category: 'nft',
     url: 'https://magiceden.io/',
     tags: ['NFT', 'Marketplace'],
+    lookingForTesters: false,
   },
   {
     id: '14',
@@ -130,6 +149,7 @@ const projects: Project[] = [
     category: 'tool',
     url: 'https://squads.so/',
     tags: ['Multisig', 'Security'],
+    lookingForTesters: false,
   },
   {
     id: '15',
@@ -138,11 +158,52 @@ const projects: Project[] = [
     category: 'tool',
     url: 'https://helius.dev/',
     tags: ['RPC', 'API'],
+    lookingForTesters: false,
+  },
+  {
+    id: '16',
+    name: 'Drift Devnet',
+    description: 'Perps sandbox on devnet; test trades and liquidations with play SOL.',
+    category: 'defi',
+    url: 'https://app.drift.trade/',
+    tags: ['Perps', 'Trading', 'Devnet'],
+    lookingForTesters: true,
+    incentive: 'Looking for tester feedback on UX',
+    startsAt: '2025-12-15',
+    tasks: ['Open a position with play SOL', 'Close position and check PnL', 'Report any latency issues'],
+    contact: 'discord.gg/drift',
+  },
+  {
+    id: '17',
+    name: 'Solana Pay Sandbox',
+    description: 'Test QR payments and merchant flows with devnet wallets.',
+    category: 'tool',
+    url: 'https://solanapay.com/',
+    tags: ['Payments', 'QR', 'Devnet'],
+    lookingForTesters: true,
+    incentive: 'Gift card raffle for testers',
+    startsAt: '2025-12-20',
+    tasks: ['Create a payment request', 'Pay with FakeSOL wallet', 'Verify receipt on Explorer'],
+    contact: '@solanapay',
+  },
+  {
+    id: '18',
+    name: 'MadLads Devnet Mint',
+    description: 'Trial mint flow on devnet to validate wallet UX and metadata.',
+    category: 'nft',
+    url: 'https://madlads.com/',
+    tags: ['NFT', 'Mint', 'Devnet'],
+    lookingForTesters: true,
+    incentive: 'WL for mainnet raffle',
+    startsAt: '2025-12-22',
+    tasks: ['Mint a devnet NFT', 'List on devnet marketplace', 'Share feedback on metadata/display'],
+    contact: 'discord.gg/madlads',
   },
 ];
 
 const categories = [
   { id: 'all', label: 'All Projects', icon: '🌐' },
+  { id: 'needs-testers', label: 'Needs Testers', icon: '🧪' },
   { id: 'tool', label: 'Tools', icon: '🛠️' },
   { id: 'defi', label: 'DeFi', icon: '💰' },
   { id: 'nft', label: 'NFT', icon: '🎨' },
@@ -158,17 +219,13 @@ const categoryColors: Record<string, string> = {
   game: 'from-red-500 to-pink-500',
 };
 
-function ProjectCard({ project }: { project: Project }) {
+function ProjectCard({ project, onDetails }: { project: Project; onDetails: (p: Project) => void }) {
   const gradient = categoryColors[project.category] || 'from-zinc-500 to-zinc-600';
+  const isFresh = project.startsAt ? (Date.now() - new Date(project.startsAt).getTime()) / (1000 * 60 * 60 * 24) < 7 : false;
   
   return (
     <Card variant="interactive" padding="none" className="group">
-      <a
-        href={project.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block p-5"
-      >
+      <div className="p-5 space-y-3">
         <div className="flex items-start gap-4">
           <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${gradient} flex items-center justify-center text-white font-bold text-lg flex-shrink-0`}>
             {project.name.charAt(0)}
@@ -178,14 +235,14 @@ function ProjectCard({ project }: { project: Project }) {
               <h3 className="font-semibold text-white group-hover:text-purple-400 transition-colors truncate">
                 {project.name}
               </h3>
-              {project.featured && (
-                <Badge variant="purple">Featured</Badge>
-              )}
+              {project.featured && <Badge variant="purple">Featured</Badge>}
+              {project.lookingForTesters && <Badge variant="success">Needs testers</Badge>}
+              {isFresh && <Badge variant="warning">New</Badge>}
             </div>
-            <p className="text-sm text-zinc-400 line-clamp-2 mb-3">
+            <p className="text-sm text-zinc-400 line-clamp-2 mb-2">
               {project.description}
             </p>
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 mb-2">
               {project.tags.map((tag) => (
                 <span
                   key={tag}
@@ -195,12 +252,38 @@ function ProjectCard({ project }: { project: Project }) {
                 </span>
               ))}
             </div>
-          </div>
-          <div className="text-zinc-600 group-hover:text-purple-400 transition-colors">
-            {Icons.external}
+            {project.incentive && (
+              <div className="text-xs text-amber-300 bg-amber-500/10 border border-amber-500/30 px-3 py-2 rounded-lg inline-flex items-center gap-2">
+                <span>🎁</span>
+                <span>{project.incentive}</span>
+              </div>
+            )}
           </div>
         </div>
-      </a>
+        <div className="flex items-center justify-between gap-3 text-sm">
+          <div className="text-zinc-500 flex items-center gap-2">
+            <span>Category:</span>
+            <span className="text-white capitalize">{project.category}</span>
+          </div>
+          <div className="flex gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => onDetails(project)}
+            >
+              Details
+            </Button>
+            <a
+              href={project.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-3 py-2 bg-purple-600/20 border border-purple-500/30 rounded-lg text-purple-200 hover:bg-purple-600/30 transition-colors"
+            >
+              Visit {Icons.external}
+            </a>
+          </div>
+        </div>
+      </div>
     </Card>
   );
 }
@@ -208,16 +291,30 @@ function ProjectCard({ project }: { project: Project }) {
 export function Explore() {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortByNew, setSortByNew] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
   const filteredProjects = projects.filter((project) => {
-    const matchesCategory = selectedCategory === 'all' || project.category === selectedCategory;
+    const matchesCategory = selectedCategory === 'all'
+      ? true
+      : selectedCategory === 'needs-testers'
+        ? project.lookingForTesters
+        : project.category === selectedCategory;
     const matchesSearch = project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
     return matchesCategory && matchesSearch;
   });
 
+  const sortedProjects = [...filteredProjects].sort((a, b) => {
+    if (!sortByNew) return 0;
+    const aDate = a.startsAt ? new Date(a.startsAt).getTime() : 0;
+    const bDate = b.startsAt ? new Date(b.startsAt).getTime() : 0;
+    return bDate - aDate;
+  });
+
   const featuredProjects = projects.filter(p => p.featured);
+  const testerProjects = projects.filter(p => p.lookingForTesters);
 
   return (
     <div className="space-y-6 pb-20 lg:pb-0">
@@ -251,7 +348,21 @@ export function Explore() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {featuredProjects.map((project) => (
-              <ProjectCard key={project.id} project={project} />
+              <ProjectCard key={project.id} project={project} onDetails={setSelectedProject} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Needs Testers Spotlight */}
+      {selectedCategory === 'all' && testerProjects.length > 0 && (
+        <div>
+          <h2 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
+            <span className="text-green-400">🧪</span> Projects looking for testers
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {testerProjects.slice(0, 4).map((project) => (
+              <ProjectCard key={project.id} project={project} onDetails={setSelectedProject} />
             ))}
           </div>
         </div>
@@ -275,6 +386,16 @@ export function Explore() {
             <span>{category.label}</span>
           </button>
         ))}
+        <button
+          onClick={() => setSortByNew((v) => !v)}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap transition-all ${
+            sortByNew
+              ? 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+              : 'bg-zinc-800/50 text-zinc-400 border border-transparent hover:bg-zinc-800 hover:text-white'
+          }`}
+        >
+          🆕 New this week
+        </button>
       </div>
 
       {/* Project Grid */}
@@ -283,10 +404,10 @@ export function Explore() {
           <h2 className="text-lg font-semibold text-white">
             {selectedCategory === 'all' ? 'All Projects' : categories.find(c => c.id === selectedCategory)?.label}
           </h2>
-          <span className="text-sm text-zinc-500">{filteredProjects.length} projects</span>
+          <span a className="text-sm text-zinc-500">{sortedProjects.length} projects</span>
         </div>
 
-        {filteredProjects.length === 0 ? (
+        {sortedProjects.length === 0 ? (
           <Card variant="glass" padding="lg">
             <div className="text-center py-8">
               <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-zinc-800/50 flex items-center justify-center">
@@ -312,11 +433,9 @@ export function Explore() {
           </Card>
         ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            {filteredProjects
-              .filter(p => selectedCategory !== 'all' || !searchQuery ? true : !p.featured)
-              .map((project) => (
-                <ProjectCard key={project.id} project={project} />
-              ))}
+            {sortedProjects.map((project) => (
+              <ProjectCard key={project.id} project={project} onDetails={setSelectedProject} />
+            ))}
           </div>
         )}
       </div>
@@ -360,6 +479,80 @@ export function Explore() {
           </div>
         </div>
       </Card>
+
+      {selectedProject && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card variant="glass" padding="lg" className="max-w-2xl w-full relative">
+            <button
+              className="absolute top-4 right-4 text-zinc-500 hover:text-white"
+              onClick={() => setSelectedProject(null)}
+              aria-label="Close"
+            >
+              ✕
+            </button>
+            <div className="space-y-4">
+              <div className="flex items-start gap-3">
+                <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${categoryColors[selectedProject.category] || 'from-zinc-500 to-zinc-600'} flex items-center justify-center text-white font-bold text-lg`}>
+                  {selectedProject.name.charAt(0)}
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h2 className="text-xl font-semibold text-white">{selectedProject.name}</h2>
+                    {selectedProject.featured && <Badge variant="purple">Featured</Badge>}
+                    {selectedProject.lookingForTesters && <Badge variant="success">Needs testers</Badge>}
+                  </div>
+                  <p className="text-sm text-zinc-400 mt-2">{selectedProject.description}</p>
+                </div>
+              </div>
+
+              {selectedProject.incentive && (
+                <div className="text-sm text-amber-200 bg-amber-500/10 border border-amber-500/30 px-3 py-2 rounded-lg inline-flex items-center gap-2">
+                  <span>🎁</span>
+                  <span>{selectedProject.incentive}</span>
+                </div>
+              )}
+
+              <div className="flex flex-wrap gap-2 text-xs text-zinc-400">
+                <span className="px-2 py-1 bg-zinc-800 rounded-lg">Category: {selectedProject.category}</span>
+                {selectedProject.startsAt && <span className="px-2 py-1 bg-zinc-800 rounded-lg">Starts: {selectedProject.startsAt}</span>}
+                {selectedProject.endsAt && <span className="px-2 py-1 bg-zinc-800 rounded-lg">Ends: {selectedProject.endsAt}</span>}
+                {selectedProject.contact && <span className="px-2 py-1 bg-zinc-800 rounded-lg">Contact: {selectedProject.contact}</span>}
+              </div>
+
+              {selectedProject.tasks && selectedProject.tasks.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm text-white font-semibold">Suggested tester tasks</p>
+                  <ul className="list-disc list-inside text-sm text-zinc-400 space-y-1">
+                    {selectedProject.tasks.map((task) => (
+                      <li key={task}>{task}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              <div className="flex items-center gap-3 flex-wrap">
+                <a
+                  href={selectedProject.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
+                >
+                  Open project {Icons.external}
+                </a>
+                <Button
+                  variant="secondary"
+                  onClick={() => {
+                    const template = `Testing ${selectedProject.name}\n\nWhat I tested:\n- ${selectedProject.tasks?.join('\n- ') || 'Flow'}\n\nFeedback:\n- `;
+                    navigator.clipboard.writeText(template);
+                  }}
+                >
+                  Copy report template
+                </Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
     </div>
   );
 }

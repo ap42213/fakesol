@@ -8,6 +8,30 @@ import { shortenAddress } from '../lib/solana';
 import { Logo } from '../components/Logo';
 import { api } from '../lib/api';
 
+const testerSpotlight = [
+  {
+    name: 'Drift Devnet',
+    description: 'Perps sandbox; test trades/liquidations with play SOL.',
+    url: 'https://app.drift.trade/',
+    incentive: 'UX feedback wanted',
+    tag: 'DeFi',
+  },
+  {
+    name: 'Solana Pay Sandbox',
+    description: 'Try QR payments and merchant flows with devnet wallets.',
+    url: 'https://solanapay.com/',
+    incentive: 'Raffle for testers',
+    tag: 'Payments',
+  },
+  {
+    name: 'MadLads Devnet Mint',
+    description: 'Trial mint flow to validate metadata/display.',
+    url: 'https://madlads.com/',
+    incentive: 'WL raffle',
+    tag: 'NFT',
+  },
+];
+
 export function Dashboard() {
   const { 
     publicKey, 
@@ -277,6 +301,38 @@ export function Dashboard() {
           </div>
         )}
       </div>
+
+      {/* Tester Spotlight */}
+      <Card variant="glass" padding="md">
+        <div className="flex items-center justify-between mb-3">
+          <div>
+            <p className="text-sm text-zinc-400">Looking for testers</p>
+            <p className="text-lg font-semibold text-white">Featured devnet projects</p>
+          </div>
+          <Link to="/explore" className="text-sm text-purple-400 hover:text-purple-300">See all →</Link>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          {testerSpotlight.map((proj) => (
+            <a
+              key={proj.name}
+              href={proj.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-4 rounded-xl bg-zinc-900 border border-zinc-800 hover:border-purple-500/40 hover:bg-zinc-900/80 transition-colors block"
+            >
+              <div className="flex items-center justify-between mb-2">
+                <p className="text-sm font-semibold text-white truncate">{proj.name}</p>
+                <Badge variant="outline">{proj.tag}</Badge>
+              </div>
+              <p className="text-xs text-zinc-400 mb-2 line-clamp-2">{proj.description}</p>
+              <div className="text-[11px] text-amber-300 bg-amber-500/10 border border-amber-500/30 px-2 py-1 rounded-lg inline-flex items-center gap-1">
+                <span>🎁</span>
+                <span>{proj.incentive}</span>
+              </div>
+            </a>
+          ))}
+        </div>
+      </Card>
 
       {/* Info Card */}
       <Card variant="glass" padding="md">
