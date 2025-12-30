@@ -9,5 +9,9 @@ RUN npm install
 # Copy server source
 COPY server/ ./
 
+# Some platforms/services run commands from /app/server but still reference paths like
+# `server/scripts/...` (as if the CWD were /app). Provide a compatible alias.
+RUN ln -s . server
+
 # Run refill script
 CMD ["npx", "tsx", "scripts/refillTreasury.ts"]
