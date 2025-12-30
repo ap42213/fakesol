@@ -25,7 +25,7 @@ export function LogoWithText({ size = 'md', className = '' }: LogoProps) {
   return (
     <div className={`flex items-center gap-2 ${className}`}>
       <Logo size={size} />
-      <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-teal-400 bg-clip-text text-transparent">
+      <span className="text-3xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
         FakeSOL
       </span>
     </div>
