@@ -10,25 +10,25 @@ import { api } from '../lib/api';
 
 const testerSpotlight = [
   {
-    name: 'Drift Devnet',
-    description: 'Perps sandbox; test trades/liquidations with play SOL.',
-    url: 'https://app.drift.trade/',
-    incentive: 'UX feedback wanted',
-    tag: 'DeFi',
+    name: 'Anchor Playground',
+    description: 'Spin up and test programs on devnet with browser-based deployment.',
+    url: 'https://anchor.projectserum.com/',
+    incentive: '@projectserum',
+    tag: 'Development',
   },
   {
-    name: 'Solana Pay Sandbox',
-    description: 'Try QR payments and merchant flows with devnet wallets.',
-    url: 'https://solanapay.com/',
-    incentive: 'Raffle for testers',
-    tag: 'Payments',
+    name: 'Solana Explorer (devnet)',
+    description: 'Verify transactions, tokens, and programs on the devnet cluster.',
+    url: 'https://explorer.solana.com/?cluster=devnet',
+    incentive: '@solana',
+    tag: 'Explorer',
   },
   {
-    name: 'MadLads Devnet Mint',
-    description: 'Trial mint flow to validate metadata/display.',
-    url: 'https://madlads.com/',
-    incentive: 'WL raffle',
-    tag: 'NFT',
+    name: 'Solana Faucet',
+    description: 'Request devnet SOL to test transactions and flows safely.',
+    url: 'https://faucet.solana.com/',
+    incentive: '@solana',
+    tag: 'Faucet',
   },
 ];
 
@@ -47,6 +47,7 @@ export function Dashboard() {
   
   const { showToast } = useToast();
   const [airdropLoading, setAirdropLoading] = useState(false);
+  const [treasuryLoading, setTreasuryLoading] = useState(false);
   const [copiedSig, setCopiedSig] = useState<string | null>(null);
   const [clusterInfo, setClusterInfo] = useState<{ rpcUrl: string; slot: number; blockHeight: number; version: string } | null>(null);
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
@@ -93,6 +94,28 @@ export function Dashboard() {
       showToast(err.message || 'Airdrop failed', 'error');
     } finally {
       setAirdropLoading(false);
+    }
+  };
+
+  const handleTreasuryAirdrop = async () => {
+    if (!publicKey) {
+      showToast('Connect a wallet first', 'error');
+      return;
+    }
+    setTreasuryLoading(true);
+    clearError();
+    try {
+      const res = await api.requestTreasuryAirdrop(publicKey, 1);
+      if (res.error || !res.data?.success) {
+        throw new Error(res.error || res.message || 'Treasury drop failed');
+      }
+      showToast('Treasury drop sent! +1 SOL', 'success');
+      await refreshBalance();
+      await fetchTransactions();
+    } catch (err: any) {
+      showToast(err.message || 'Treasury drop failed', 'error');
+    } finally {
+      setTreasuryLoading(false);
     }
   };
 
@@ -158,6 +181,15 @@ export function Dashboard() {
               icon={Icons.droplet}
             >
               Airdrop
+            </Button>
+            <Button
+              variant="secondary"
+              size="lg"
+              onClick={handleTreasuryAirdrop}
+              loading={treasuryLoading}
+              icon={Icons.solana}
+            >
+              Treasury Drop
             </Button>
           </div>
         </div>

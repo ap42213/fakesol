@@ -76,6 +76,31 @@ export const api = {
       body: JSON.stringify({ amount }),
     }),
 
+  // Treasury-backed devnet drop (uses server-managed key)
+  requestTreasuryAirdrop: (address: string, amount: number = 1) =>
+    apiRequest<{
+      success: boolean;
+      signature: string;
+      amount: number;
+      fee: number;
+      from: string;
+      to: string;
+      explorerUrl: string;
+    }>(`/faucet/treasury`, {
+      method: 'POST',
+      body: JSON.stringify({ address, amount }),
+    }),
+
+  // Treasury health
+  getTreasuryHealth: () =>
+    apiRequest<{
+      status: string;
+      publicKey: string;
+      balance: number;
+      maxPerRequest: number;
+      cooldownMs: number;
+    }>(`/faucet/treasury/health`),
+
   // Get transactions
   getTransactions: (address: string, limit: number = 20) => 
     apiRequest<{

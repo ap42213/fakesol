@@ -109,6 +109,8 @@ if (isProduction) {
         validateAddress: 'GET /api/wallet/validate/:address',
         getBalance: 'GET /api/wallet/:address/balance',
         requestAirdrop: 'POST /api/wallet/:address/airdrop',
+        treasuryAirdrop: 'POST /api/faucet/treasury',
+        treasuryHealth: 'GET /api/faucet/treasury/health',
         getTransactions: 'GET /api/wallet/:address/transactions',
         getTokens: 'GET /api/wallet/:address/tokens',
         getTokenBalance: 'GET /api/wallet/:address/token/:mint',

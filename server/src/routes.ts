@@ -15,6 +15,8 @@ import {
   getPerformanceSamples,
   getTokenAccounts,
   getTokenBalance,
+  getTreasuryBalance,
+  sendFromTreasury,
 } from './solana.js';
 import fs from 'fs';
 import path from 'path';
@@ -68,6 +70,11 @@ function writeProjects(list: StoredProject[]) {
 // Rate limiting for airdrops (track by IP)
 const airdropCooldowns = new Map<string, number>();
 const AIRDROP_COOLDOWN = parseInt(process.env.AIRDROP_COOLDOWN_MS || '60000');
+
+// Treasury faucet config
+const treasuryCooldowns = new Map<string, number>();
+const TREASURY_COOLDOWN = parseInt(process.env.TREASURY_COOLDOWN_MS || '30000');
+const TREASURY_MAX_SOL = parseFloat(process.env.TREASURY_MAX_SOL || '1');
 
 // Health check - simple and fast for Railway healthcheck
 router.get('/health', async (_req: Request, res: Response) => {
@@ -149,6 +156,73 @@ router.post('/projects', async (req: Request, res: Response) => {
   writeProjects(existing);
 
   res.json({ project });
+});
+
+// Treasury faucet health
+router.get('/faucet/treasury/health', async (_req: Request, res: Response) => {
+  try {
+    const info = await getTreasuryBalance();
+    res.json({
+      status: 'ok',
+      publicKey: info.publicKey,
+      balance: info.balance,
+      maxPerRequest: TREASURY_MAX_SOL,
+      cooldownMs: TREASURY_COOLDOWN,
+    });
+  } catch (error: any) {
+    res.status(503).json({
+      error: 'Treasury unavailable',
+      message: error.message || 'Treasury key not configured',
+    });
+  }
+});
+
+// Treasury-backed devnet faucet
+router.post('/faucet/treasury', async (req: Request, res: Response) => {
+  try {
+    const { address, to, amount = 1 } = req.body || {};
+    const target = (address || to || '').trim();
+    const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
+
+    if (!target || !isValidAddress(target)) {
+      return res.status(400).json({ error: 'Invalid Solana address' });
+    }
+
+    // Rate limit by IP
+    const last = treasuryCooldowns.get(clientIp);
+    if (last && Date.now() - last < TREASURY_COOLDOWN) {
+      const retryAfter = Math.ceil((TREASURY_COOLDOWN - (Date.now() - last)) / 1000);
+      return res.status(429).json({
+        error: 'Rate limited',
+        message: `Please wait ${retryAfter}s before requesting again`,
+        retryAfter,
+      });
+    }
+
+    const cappedAmount = Math.min(Math.max(Number(amount) || 0, 0.001), TREASURY_MAX_SOL);
+    if (cappedAmount <= 0) {
+      return res.status(400).json({ error: 'Amount must be greater than 0' });
+    }
+
+    const { signature, fee, from } = await sendFromTreasury(target, cappedAmount);
+    treasuryCooldowns.set(clientIp, Date.now());
+
+    res.json({
+      success: true,
+      signature,
+      amount: cappedAmount,
+      fee,
+      from,
+      to: target,
+      explorerUrl: `https://explorer.solana.com/tx/${signature}?cluster=devnet`,
+    });
+  } catch (error: any) {
+    const message = error?.message || 'Treasury transfer failed';
+    res.status(message.includes('TREASURY_SECRET_KEY') ? 503 : 500).json({
+      error: 'Treasury unavailable',
+      message,
+    });
+  }
 });
 
 // Generate new wallet

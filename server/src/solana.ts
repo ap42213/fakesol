@@ -25,6 +25,25 @@ const RPC_URLS = RPC_URLS_RAW.includes('https://api.devnet.solana.com')
 let rpcIndex = 0;
 const connections = new Map<string, Connection>();
 
+// Treasury (optional) - base58 encoded secret key
+const treasurySecret = process.env.TREASURY_SECRET_KEY?.trim();
+let cachedTreasury: Keypair | null = null;
+
+const getTreasuryKeypair = (): Keypair => {
+  if (cachedTreasury) return cachedTreasury;
+  if (!treasurySecret) {
+    throw new Error('TREASURY_SECRET_KEY not configured');
+  }
+
+  try {
+    const secretKey = bs58.decode(treasurySecret);
+    cachedTreasury = Keypair.fromSecretKey(secretKey);
+    return cachedTreasury;
+  } catch (err) {
+    throw new Error('Invalid TREASURY_SECRET_KEY');
+  }
+};
+
 // Lightweight airdrop queue to smooth bursts and avoid RPC rate limits
 const AIRDROP_DELAY_MS = 1000; // base delay between airdrops
 let airdropQueue: Promise<void> = Promise.resolve();
@@ -88,6 +107,16 @@ export const getBalance = async (publicKeyStr: string): Promise<number> => {
   const publicKey = new PublicKey(publicKeyStr);
   const balance = await conn.getBalance(publicKey);
   return balance / LAMPORTS_PER_SOL;
+};
+
+// Treasury balance helper
+export const getTreasuryBalance = async () => {
+  const treasury = getTreasuryKeypair();
+  const balance = await getBalance(treasury.publicKey.toBase58());
+  return {
+    balance,
+    publicKey: treasury.publicKey.toBase58(),
+  };
 };
 
 // Request airdrop with retry logic
@@ -178,6 +207,37 @@ export const sendTransaction = async (
   const fee = (txDetails?.meta?.fee || 5000) / LAMPORTS_PER_SOL;
   
   return { signature, fee };
+};
+
+// Send SOL from configured treasury keypair
+export const sendFromTreasury = async (
+  toPublicKeyStr: string,
+  amount: number
+): Promise<{ signature: string; fee: number; from: string }> => {
+  const treasury = getTreasuryKeypair();
+  const conn = getConnection();
+
+  const toPublicKey = new PublicKey(toPublicKeyStr);
+  const transaction = new Transaction().add(
+    SystemProgram.transfer({
+      fromPubkey: treasury.publicKey,
+      toPubkey: toPublicKey,
+      lamports: Math.floor(amount * LAMPORTS_PER_SOL),
+    })
+  );
+
+  const { blockhash, lastValidBlockHeight } = await conn.getLatestBlockhash();
+  transaction.recentBlockhash = blockhash;
+  transaction.lastValidBlockHeight = lastValidBlockHeight;
+  transaction.feePayer = treasury.publicKey;
+
+  const signature = await sendAndConfirmTransaction(conn, transaction, [treasury]);
+  const txDetails = await conn.getTransaction(signature, {
+    maxSupportedTransactionVersion: 0,
+  });
+  const fee = (txDetails?.meta?.fee || 5000) / LAMPORTS_PER_SOL;
+
+  return { signature, fee, from: treasury.publicKey.toBase58() };
 };
 
 // Get transaction history
