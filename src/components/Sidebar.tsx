@@ -133,7 +133,7 @@ export function Sidebar() {
            </div>
            
            <div>
-             <p className="text-xs text-zinc-500 mb-1">Return unused SOL:</p>
+             <p className="text-xs text-zinc-500 mb-1">Return unused <span className="text-purple-400 font-semibold">Devnet</span> SOL:</p>
              <button 
                onClick={() => {
                  navigator.clipboard.writeText('DfvJb314rHHa2Xe7aGZfhTtXDdh4GYSHcQaBLNEgtMK');
@@ -145,6 +145,7 @@ export function Sidebar() {
                 <span className="text-xs text-zinc-400 font-mono truncate">DfvJ...gtMK</span>
                 <FiCopy className="w-3 h-3 text-zinc-500 group-hover:text-white transition-colors" />
              </button>
+             <p className="text-[10px] text-zinc-600 mt-1 italic">⚠️ Do not send real SOL</p>
            </div>
         </div>
 

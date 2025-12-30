@@ -240,7 +240,7 @@ export function Welcome() {
              <a href="mailto:hello@fakesol.com" className="hover:text-zinc-300 transition-colors">Contact</a>
           </div>
           <div className="text-[10px] text-zinc-600">
-            <p>Treasury: DfvJb314rHHa2Xe7aGZfhTtXDdh4GYSHcQaBLNEgtMK</p>
+            <p>Treasury (Devnet Only): DfvJb314rHHa2Xe7aGZfhTtXDdh4GYSHcQaBLNEgtMK</p>
           </div>
         </div>
       </div>
