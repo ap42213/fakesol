@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { FiMail, FiLock, FiTag, FiAlertCircle, FiCheck, FiUser, FiGithub } from 'react-icons/fi';
+import { FiAlertCircle, FiCheck, FiUser, FiGithub } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { Logo } from '../components/Logo';
 
@@ -165,13 +165,12 @@ export function Register() {
                 Confirm Password
               </label>
               <div className="relative">
-                <FiLock className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
                 <input
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="••••••••"
-                  className={`input-field pl-12 ${
+                  className={`input-field ${
                     confirmPassword.length > 0
                       ? passwordsMatch
                         ? 'border-success/50'
@@ -192,13 +191,12 @@ export function Register() {
                 Wallet Name <span className="text-text-muted">(optional)</span>
               </label>
               <div className="relative">
-                <FiTag className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
                 <input
                   type="text"
                   value={walletName}
                   onChange={(e) => setWalletName(e.target.value)}
                   placeholder="My Wallet"
-                  className="input-field pl-12"
+                  className="input-field"
                 />
               </div>
             </div>
