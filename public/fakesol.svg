@@ -1,0 +1,12 @@
+<svg width="128" height="128" viewBox="0 0 128 128" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="solanaGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9945FF"/>
+      <stop offset="100%" style="stop-color:#14F195"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="24" fill="#0D1117"/>
+  <path d="M30 85.5L41.5 74H98L86.5 85.5H30Z" fill="url(#solanaGradient)"/>
+  <path d="M30 42.5L41.5 54H98L86.5 42.5H30Z" fill="url(#solanaGradient)"/>
+  <path d="M30 64L41.5 75.5H98L86.5 64H30Z" fill="url(#solanaGradient)" opacity="0.6"/>
+</svg>
