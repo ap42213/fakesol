@@ -10,10 +10,13 @@ import {
 import bs58 from 'bs58';
 
 // Support multiple RPC endpoints for better airdrop reliability
+// QuickNode recommended for better performance and airdrop success rate
 const RPC_ENDPOINTS = (import.meta.env.VITE_SOLANA_RPC_URLS as string | undefined)?.
   split(',')
   .map((url) => url.trim())
-  .filter(Boolean) || ['https://api.devnet.solana.com'];
+  .filter(Boolean) || [
+    'https://api.devnet.solana.com', // fallback
+  ];
 
 let rpcIndex = 0;
 

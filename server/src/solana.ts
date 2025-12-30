@@ -12,15 +12,14 @@ import { TOKEN_PROGRAM_ID, AccountLayout } from '@solana/spl-token';
 import bs58 from 'bs58';
 
 // Support multiple RPC URLs (comma-separated) for better airdrop reliability
+// QuickNode recommended for better performance and airdrop success rate
 const RPC_URLS_RAW = (process.env.SOLANA_RPC_URLS || process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com')
   .split(',')
   .map((url) => url.trim())
   .filter(Boolean);
 
-// Always include the public devnet RPC as a fallback (appended if not provided)
-const RPC_URLS = RPC_URLS_RAW.includes('https://api.devnet.solana.com')
-  ? RPC_URLS_RAW
-  : [...RPC_URLS_RAW, 'https://api.devnet.solana.com'];
+// Use configured RPC URLs (QuickNode or custom)
+const RPC_URLS = RPC_URLS_RAW;
 
 let rpcIndex = 0;
 const connections = new Map<string, Connection>();
