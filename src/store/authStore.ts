@@ -30,7 +30,6 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   checkAuth: () => Promise<void>;
-  syncWithClerk: (clerkId: string, email: string) => Promise<void>;
   
   // Wallet actions
   createWallet: (name?: string) => Promise<void>;
@@ -167,37 +166,6 @@ export const useAuthStore = create<AuthState>()(
             wallets: [],
             activeWalletId: null,
             isLoading: false,
-          });
-        }
-      },
-
-      syncWithClerk: async (clerkId: string, email: string) => {
-        set({ isLoading: true, error: null });
-        try {
-          const res = await fetch(`${API_URL}/api/auth/clerk-sync`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            credentials: 'include',
-            body: JSON.stringify({ clerkId, email }),
-          });
-
-          const data = await res.json();
-          
-          if (!res.ok) {
-            throw new Error(data.error || 'Sync failed');
-          }
-
-          set({
-            user: data.user,
-            token: data.token,
-            wallets: data.wallets,
-            activeWalletId: data.wallets[0]?.id || null,
-            isLoading: false,
-          });
-        } catch (error) {
-          set({ 
-            isLoading: false, 
-            error: error instanceof Error ? error.message : 'Sync failed' 
           });
         }
       },

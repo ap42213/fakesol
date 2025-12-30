@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { FiMail, FiLock, FiAlertCircle, FiUser } from 'react-icons/fi';
+import { FiMail, FiLock, FiAlertCircle, FiUser, FiGithub } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { Logo } from '../components/Logo';
 
@@ -110,7 +110,7 @@ export function Login() {
             </button>
           </form>
 
-          {oauthProviders.google && (
+          {(oauthProviders.google || oauthProviders.github) && (
             <>
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
@@ -121,13 +121,26 @@ export function Login() {
                 </div>
               </div>
 
-              <a
-                href={`${API_URL}/api/oauth/google`}
-                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-white text-gray-800 font-medium hover:bg-gray-100 transition-colors"
-              >
-                <FcGoogle className="w-5 h-5" />
-                Continue with Google
-              </a>
+              <div className="space-y-3">
+                {oauthProviders.google && (
+                  <a
+                    href={`${API_URL}/api/oauth/google`}
+                    className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-white text-gray-800 font-medium hover:bg-gray-100 transition-colors"
+                  >
+                    <FcGoogle className="w-5 h-5" />
+                    Continue with Google
+                  </a>
+                )}
+                {oauthProviders.github && (
+                  <a
+                    href={`${API_URL}/api/oauth/github`}
+                    className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-zinc-800 text-white font-medium hover:bg-zinc-700 transition-colors"
+                  >
+                    <FiGithub className="w-5 h-5" />
+                    Continue with GitHub
+                  </a>
+                )}
+              </div>
             </>
           )}
 

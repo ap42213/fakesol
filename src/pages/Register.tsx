@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import { FiMail, FiLock, FiTag, FiAlertCircle, FiCheck, FiUser } from 'react-icons/fi';
+import { FiMail, FiLock, FiTag, FiAlertCircle, FiCheck, FiUser, FiGithub } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { Logo } from '../components/Logo';
 
@@ -69,15 +69,28 @@ export function Register() {
 
         {/* Form */}
         <div className="card-glass p-8">
-          {oauthProviders.google && (
+          {(oauthProviders.google || oauthProviders.github) && (
             <>
-              <a
-                href={`${API_URL}/api/oauth/google`}
-                className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-white text-gray-800 font-medium hover:bg-gray-100 transition-colors"
-              >
-                <FcGoogle className="w-5 h-5" />
-                Sign up with Google
-              </a>
+              <div className="space-y-3">
+                {oauthProviders.google && (
+                  <a
+                    href={`${API_URL}/api/oauth/google`}
+                    className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-white text-gray-800 font-medium hover:bg-gray-100 transition-colors"
+                  >
+                    <FcGoogle className="w-5 h-5" />
+                    Sign up with Google
+                  </a>
+                )}
+                {oauthProviders.github && (
+                  <a
+                    href={`${API_URL}/api/oauth/github`}
+                    className="w-full flex items-center justify-center gap-3 py-3 px-4 rounded-xl bg-zinc-800 text-white font-medium hover:bg-zinc-700 transition-colors"
+                  >
+                    <FiGithub className="w-5 h-5" />
+                    Sign up with GitHub
+                  </a>
+                )}
+              </div>
 
               <div className="relative my-6">
                 <div className="absolute inset-0 flex items-center">
