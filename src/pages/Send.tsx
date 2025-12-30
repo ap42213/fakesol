@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { Icons, Badge, useToast } from '../components/ui/index';
+import { Logo } from '../components/Logo';
 import { isValidAddress, shortenAddress } from '../lib/solana';
 
 export function Send() {
@@ -132,9 +133,7 @@ export function Send() {
       <Card variant="glass" padding="md">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-green-400 flex items-center justify-center text-white">
-              {Icons.solana}
-            </div>
+            <Logo size="sm" />
             <div>
               <p className="text-xs text-zinc-500">Available Balance</p>
               <p className="text-lg font-bold text-white">{balance.toFixed(4)} SOL</p>
@@ -181,7 +180,7 @@ export function Send() {
                 setAmountError('');
               }}
               error={amountError}
-              leftIcon={Icons.solana}
+              leftIcon={<Logo size="xs" />}
               rightElement={
                 <span className="text-zinc-500 text-sm pr-2">SOL</span>
               }

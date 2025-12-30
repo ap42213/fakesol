@@ -3,6 +3,7 @@ import { useWalletStore } from '../store/walletStore';
 import { shortenAddress } from '../lib/solana';
 import { Icons, Badge, CopyButton } from './ui/index';
 import { Button } from './ui/Button';
+import { Logo } from './Logo';
 
 export function Header() {
   const { publicKey, balance, refreshBalance, isLoading } = useWalletStore();
@@ -13,9 +14,7 @@ export function Header() {
       <div className="h-full px-4 lg:px-8 flex items-center justify-between max-w-4xl mx-auto">
         {/* Mobile Logo */}
         <div className="lg:hidden flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-purple-500 to-green-400 flex items-center justify-center">
-            <span className="text-white text-sm">{Icons.solana}</span>
-          </div>
+          <Logo size="md" />
           <span className="font-bold text-white">FakeSOL</span>
         </div>
 
@@ -42,9 +41,7 @@ export function Header() {
 
           {/* Balance Display */}
           <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-zinc-800/50 rounded-xl border border-zinc-700/50">
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-purple-500 to-green-400 flex items-center justify-center">
-              <span className="text-white text-xs">{Icons.solana}</span>
-            </div>
+            <Logo size="xs" />
             <span className="font-semibold text-white">{balance.toFixed(2)}</span>
             <span className="text-zinc-400 text-sm">SOL</span>
           </div>

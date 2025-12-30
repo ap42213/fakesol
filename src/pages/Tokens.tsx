@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { useWalletStore } from '../store/walletStore';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { Icons, Badge, Skeleton } from '../components/ui/index';
+import { Badge, Skeleton } from '../components/ui/index';
+import { Logo } from '../components/Logo';
 import { api } from '../lib/api';
 
 interface Token {
@@ -120,11 +121,7 @@ export function Tokens() {
       {/* Token Count */}
       <Card variant="gradient" padding="md">
         <div className="flex items-center gap-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-500/20 to-cyan-400/20 flex items-center justify-center">
-            <div className="text-purple-400">
-              {Icons.solana}
-            </div>
-          </div>
+          <Logo size="lg" />
           <div>
             <p className="text-zinc-400 text-sm">Total Tokens</p>
             <p className="text-3xl font-bold text-white">

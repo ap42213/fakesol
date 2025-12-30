@@ -5,6 +5,7 @@ import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { Icons, Badge, Modal } from '../components/ui/index';
+import { Logo } from '../components/Logo';
 import { FiLogIn, FiUserPlus } from 'react-icons/fi';
 
 export function Welcome() {
@@ -67,8 +68,8 @@ export function Welcome() {
           <>
             {/* Logo & Title */}
             <div className="text-center mb-8">
-              <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-500 to-green-400 mb-6 shadow-2xl shadow-purple-500/30">
-                <span className="text-white text-3xl">{Icons.solana}</span>
+              <div className="inline-flex items-center justify-center mb-6">
+                <Logo size="xl" className="shadow-2xl shadow-purple-500/30" />
               </div>
               <h1 className="text-4xl font-extrabold text-white mb-2">FakeSOL</h1>
               <p className="text-zinc-400 text-lg">

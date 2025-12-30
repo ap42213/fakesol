@@ -3,6 +3,7 @@ import { useWalletStore } from '../store/walletStore';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Icons, Badge, Modal, useToast } from '../components/ui/index';
+import { Logo } from '../components/Logo';
 
 export function Settings() {
   const { publicKey, balance, exportKey, disconnect } = useWalletStore();
@@ -40,9 +41,7 @@ export function Settings() {
       {/* Wallet Overview */}
       <Card variant="gradient" padding="lg">
         <div className="flex items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-purple-500 to-cyan-400 flex items-center justify-center text-white">
-            {Icons.solana}
-          </div>
+          <Logo size="lg" />
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-1">
               <p className="font-semibold text-white">Devnet Wallet</p>
@@ -150,8 +149,8 @@ export function Settings() {
             className="w-full p-4 flex items-center justify-between hover:bg-zinc-800/50 transition-colors rounded-b-2xl"
           >
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-400">
-                {Icons.solana}
+              <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                <Logo size="sm" />
               </div>
               <div className="text-left">
                 <p className="text-white font-medium">Solana Docs</p>

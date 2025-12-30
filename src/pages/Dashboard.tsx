@@ -1,27 +1,27 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useWalletStore } from '../store/walletStore';
-import { Copy, Send, Download, Menu, WalletIcon, RefreshCw, ExternalLink } from 'lucide-react';
 import { Button } from '../components/ui/Button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../components/ui/Card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/Table';
-import { Badge } from '../components/ui/Badge';
-import { Link, useLocation } from 'react-router-dom';
+import { Card } from '../components/ui/Card';
+import { Icons, Badge, CopyButton, useToast } from '../components/ui/index';
+import { shortenAddress } from '../lib/solana';
+import { Logo } from '../components/Logo';
 
 export function Dashboard() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [copied, setCopied] = useState(false);
-  const [airdropLoading, setAirdropLoading] = useState(false);
-  const location = useLocation();
-
   const { 
     publicKey, 
     balance, 
     transactions,
     isLoading, 
+    error,
     refreshBalance, 
     requestAirdrop,
     fetchTransactions,
+    clearError 
   } = useWalletStore();
+  
+  const { showToast } = useToast();
+  const [airdropLoading, setAirdropLoading] = useState(false);
 
   useEffect(() => {
     refreshBalance();
@@ -30,283 +30,212 @@ export function Dashboard() {
     return () => clearInterval(interval);
   }, [refreshBalance, fetchTransactions]);
 
-  const copyAddress = async () => {
-    if (!publicKey) return;
-    await navigator.clipboard.writeText(publicKey);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
   const handleAirdrop = async () => {
     setAirdropLoading(true);
+    clearError();
     try {
       await requestAirdrop(1);
-    } catch (err) {
-      console.error('Airdrop failed', err);
+      showToast('Airdrop successful! +1 SOL', 'success');
+    } catch (err: any) {
+      showToast(err.message || 'Airdrop failed', 'error');
     } finally {
       setAirdropLoading(false);
     }
   };
 
-  const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: 'layout-dashboard' },
-    { name: 'Wallet', path: '/wallet', icon: 'wallet' },
-    { name: 'Extension', path: '/extension', icon: 'puzzle' },
-    { name: 'Settings', path: '/settings', icon: 'settings' },
-  ];
-
-  const renderIcon = (iconName: string) => {
-    const iconProps = { className: 'h-5 w-5' };
-    switch (iconName) {
-      case 'layout-dashboard':
-        return (
-          <svg {...iconProps} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <rect x="3" y="3" width="7" height="7" rx="1" />
-            <rect x="14" y="3" width="7" height="7" rx="1" />
-            <rect x="14" y="14" width="7" height="7" rx="1" />
-            <rect x="3" y="14" width="7" height="7" rx="1" />
-          </svg>
-        );
-      case 'wallet':
-        return <WalletIcon {...iconProps} />;
-      case 'puzzle':
-        return (
-          <svg {...iconProps} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M19.439 7.85c-.049.322.059.648.289.878l1.568 1.568c.47.47.706 1.087.706 1.704s-.235 1.233-.706 1.704l-1.611 1.611a.98.98 0 0 1-.837.276c-.47-.07-.802-.48-.968-.925a2.501 2.501 0 1 0-3.214 3.214c.446.166.855.497.925.968a.979.979 0 0 1-.276.837l-1.61 1.61a2.404 2.404 0 0 1-1.705.707 2.402 2.402 0 0 1-1.704-.706l-1.568-1.568a1.026 1.026 0 0 0-.877-.29c-.493.074-.84.504-1.02.968a2.5 2.5 0 1 1-3.237-3.237c.464-.18.894-.527.967-1.02a1.026 1.026 0 0 0-.289-.877l-1.568-1.568A2.402 2.402 0 0 1 1.998 12c0-.617.236-1.234.706-1.704L4.23 8.77c.24-.24.581-.353.917-.303.515.077.877.528 1.073 1.01a2.5 2.5 0 1 0 3.259-3.259c-.482-.196-.933-.558-1.01-1.073-.05-.336.062-.676.303-.917l1.525-1.525A2.402 2.402 0 0 1 12 1.998c.617 0 1.234.236 1.704.706l1.568 1.568c.23.23.556.338.877.29.493-.074.84-.504 1.02-.968a2.5 2.5 0 1 1 3.237 3.237c-.464.18-.894.527-.967 1.02Z" />
-          </svg>
-        );
-      case 'settings':
-        return (
-          <svg {...iconProps} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-            <circle cx="12" cy="12" r="3" />
-          </svg>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
-    <div className="flex h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white">
-      {/* Sidebar */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 w-64 transform bg-slate-950/95 backdrop-blur-xl border-r border-slate-800 transition-transform duration-300 lg:relative lg:translate-x-0 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}
-      >
-        <div className="flex h-full flex-col">
-          {/* Logo */}
-          <div className="flex h-16 items-center gap-3 border-b border-slate-800 px-6">
-            <img src="/fakesol-logo.png" alt="FakeSOL Logo" className="h-10 w-10 rounded-lg" />
-            <span className="text-xl font-bold bg-gradient-to-r from-purple-400 to-teal-400 bg-clip-text text-transparent">
-              FakeSOL
-            </span>
-          </div>
+    <div className="space-y-6 pb-20 lg:pb-0">
+      {/* Page Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-white">Dashboard</h1>
+          <p className="text-zinc-500">Manage your devnet wallet</p>
+        </div>
+        <Button
+          variant="ghost"
+          onClick={() => refreshBalance()}
+          loading={isLoading}
+        >
+          {Icons.refresh}
+          <span className="hidden sm:inline">Refresh</span>
+        </Button>
+      </div>
 
-          {/* Navigation */}
-          <nav className="flex-1 space-y-2 p-4">
-            {navItems.map((item) => (
-              <Link
-                key={item.name}
-                to={item.path}
-                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-all ${
-                  location.pathname === item.path
-                    ? 'bg-gradient-to-r from-purple-600 to-teal-600 text-white shadow-lg'
-                    : 'text-gray-400 hover:bg-slate-800/50 hover:text-white'
-                }`}
-              >
-                {renderIcon(item.icon)}
-                <span className="font-medium">{item.name}</span>
-              </Link>
-            ))}
-          </nav>
-
-          {/* Footer */}
-          <div className="border-t border-slate-800 p-4">
-            <div className="rounded-lg bg-slate-900/80 p-4 border border-slate-800">
-              <p className="text-xs text-gray-400 mb-2">Network Status</p>
-              <div className="flex items-center gap-2">
-                <div className="h-2 w-2 rounded-full bg-teal-500 animate-pulse" />
-                <span className="text-sm font-medium text-gray-200">Devnet Active</span>
-              </div>
+      {/* Balance Card */}
+      <Card variant="gradient" padding="lg">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
+          <div>
+            <p className="text-zinc-400 text-sm mb-2">Total Balance</p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-5xl font-extrabold text-white number-animate">
+                {isLoading && balance === 0 ? '...' : balance.toFixed(4)}
+              </span>
+              <span className="text-2xl text-zinc-400">SOL</span>
             </div>
+            <p className="text-zinc-500 text-sm mt-2">
+              ≈ $0.00 USD <Badge variant="warning">No real value</Badge>
+            </p>
+          </div>
+          
+          <div className="flex gap-3">
+            <Button
+              variant="success"
+              size="lg"
+              onClick={handleAirdrop}
+              loading={airdropLoading}
+              icon={Icons.droplet}
+            >
+              Airdrop
+            </Button>
           </div>
         </div>
-      </aside>
+      </Card>
 
-      {/* Mobile sidebar overlay */}
-      {sidebarOpen && (
-        <div className="fixed inset-0 z-40 bg-black/70 lg:hidden" onClick={() => setSidebarOpen(false)} />
+      {/* Error Display */}
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 flex items-center gap-3">
+          <svg className="w-5 h-5 text-red-400 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+          </svg>
+          <p className="text-red-400 text-sm flex-1">{error}</p>
+          <button onClick={clearError} className="text-red-400 hover:text-red-300">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
       )}
 
-      {/* Main Content */}
-      <div className="flex flex-1 flex-col overflow-hidden">
-        {/* Top Bar */}
-        <header className="flex h-16 items-center justify-between border-b border-slate-800 bg-slate-950/95 backdrop-blur-xl px-6">
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              size="icon"
-              className="lg:hidden text-white hover:bg-slate-800"
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-            >
-              <Menu className="h-6 w-6" />
-            </Button>
-            <h1 className="text-xl font-semibold">Dashboard</h1>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => refreshBalance()}
-              disabled={isLoading}
-              className="text-gray-400 hover:text-white hover:bg-slate-800"
-            >
-              <RefreshCw className={`h-5 w-5 ${isLoading ? 'animate-spin' : ''}`} />
-            </Button>
-            <Badge className="bg-yellow-500/20 text-yellow-400 border-yellow-500/50">
-              DEVNET
-            </Badge>
-          </div>
-        </header>
-
-        {/* Main Content Area */}
-        <main className="flex-1 overflow-y-auto p-6">
-          <div className="mx-auto max-w-7xl space-y-6">
-            {/* Wallet Card */}
-            <Card className="overflow-hidden border-slate-800 bg-slate-900/80 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-white">
-                  <WalletIcon className="h-5 w-5 text-teal-400" />
-                  Your Wallet
-                </CardTitle>
-                <CardDescription className="text-gray-400">Solana Devnet</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                <div>
-                  <p className="text-sm text-gray-400 mb-2">Wallet Address</p>
-                  <div className="flex items-center gap-2 rounded-lg bg-slate-950 p-3 border border-slate-800">
-                    <code className="flex-1 text-sm text-gray-300 overflow-x-auto">
-                      {publicKey || 'No wallet connected'}
-                    </code>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      onClick={copyAddress}
-                      className="h-8 w-8 text-teal-400 hover:bg-teal-400/10 hover:text-teal-300"
-                    >
-                      <Copy className="h-4 w-4" />
-                    </Button>
-                    {publicKey && (
-                      <a
-                        href={`https://explorer.solana.com/address/${publicKey}?cluster=devnet`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="h-8 w-8 flex items-center justify-center text-purple-400 hover:bg-purple-400/10 hover:text-purple-300 rounded-md"
-                      >
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
-                    )}
-                  </div>
-                  {copied && <p className="text-xs text-teal-400 mt-1">Copied!</p>}
-                </div>
-
-                <div>
-                  <p className="text-sm text-gray-400 mb-2">Balance</p>
-                  <p className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-teal-400 bg-clip-text text-transparent">
-                    {balance.toFixed(4)} SOL
-                  </p>
-                  <p className="text-sm text-gray-500 mt-1">≈ $0.00 USD (Devnet has no real value)</p>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="flex flex-wrap gap-3">
-                  <Button 
-                    onClick={handleAirdrop}
-                    disabled={airdropLoading}
-                    className="flex-1 min-w-[140px] bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white border-0"
-                  >
-                    <Download className="mr-2 h-4 w-4" />
-                    {airdropLoading ? 'Airdropping...' : 'Airdrop 1 SOL'}
-                  </Button>
-                  <Button className="flex-1 min-w-[140px] bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white border-0">
-                    <Send className="mr-2 h-4 w-4" />
-                    Send
-                  </Button>
-                  <Button 
-                    onClick={copyAddress}
-                    className="flex-1 min-w-[140px] bg-slate-800 hover:bg-slate-700 text-white border border-slate-700"
-                  >
-                    <Copy className="mr-2 h-4 w-4" />
-                    Copy Address
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Transaction History */}
-            <Card className="border-slate-800 bg-slate-900/80 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="text-white">Transaction History</CardTitle>
-                <CardDescription className="text-gray-400">Recent wallet activity</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow className="border-slate-800 hover:bg-transparent">
-                        <TableHead className="text-gray-400">Type</TableHead>
-                        <TableHead className="text-gray-400">Signature</TableHead>
-                        <TableHead className="text-gray-400">Status</TableHead>
-                        <TableHead className="text-gray-400">Time</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {transactions.length === 0 ? (
-                        <TableRow className="border-slate-800">
-                          <TableCell colSpan={4} className="text-center text-gray-500 py-8">
-                            No transactions yet. Request an airdrop to get started!
-                          </TableCell>
-                        </TableRow>
-                      ) : (
-                        transactions.slice(0, 10).map((tx: any, index: number) => (
-                          <TableRow key={index} className="border-slate-800 hover:bg-slate-800/30">
-                            <TableCell className="font-medium text-white">
-                              {tx.type || 'Transaction'}
-                            </TableCell>
-                            <TableCell className="text-gray-400">
-                              <a
-                                href={`https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="text-purple-400 hover:underline font-mono text-xs"
-                              >
-                                {tx.signature?.slice(0, 8)}...{tx.signature?.slice(-8)}
-                              </a>
-                            </TableCell>
-                            <TableCell>
-                              <Badge className="bg-teal-500/20 text-teal-400 border-teal-500/50">
-                                {tx.status || 'Confirmed'}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-gray-400">
-                              {tx.blockTime 
-                                ? new Date(tx.blockTime * 1000).toLocaleString() 
-                                : 'Pending'}
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
+      {/* Quick Actions */}
+      <div className="grid grid-cols-2 gap-4">
+        <Link to="/send">
+          <Card variant="interactive" padding="md" className="h-full">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-purple-500/10 rounded-xl text-purple-400">
+                {Icons.send}
+              </div>
+              <div>
+                <p className="font-semibold text-white">Send</p>
+                <p className="text-sm text-zinc-500">Transfer SOL</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
+        
+        <Link to="/receive">
+          <Card variant="interactive" padding="md" className="h-full">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-green-500/10 rounded-xl text-green-400">
+                {Icons.receive}
+              </div>
+              <div>
+                <p className="font-semibold text-white">Receive</p>
+                <p className="text-sm text-zinc-500">Get SOL</p>
+              </div>
+            </div>
+          </Card>
+        </Link>
       </div>
+
+      {/* Wallet Address */}
+      <Card variant="glass" padding="md">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3 min-w-0">
+            <Logo size="sm" />
+            <div className="min-w-0">
+              <p className="text-zinc-400 text-xs mb-0.5">Your Address</p>
+              <p className="text-white font-mono text-sm truncate">
+                {publicKey}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <CopyButton text={publicKey || ''} />
+            <a
+              href={`https://explorer.solana.com/address/${publicKey}?cluster=devnet`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-all"
+            >
+              {Icons.external}
+            </a>
+          </div>
+        </div>
+      </Card>
+
+      {/* Recent Activity */}
+      <div>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-white">Recent Activity</h2>
+          <Link to="/transactions" className="text-sm text-purple-400 hover:text-purple-300">
+            View All →
+          </Link>
+        </div>
+        
+        {transactions.length === 0 ? (
+          <Card variant="glass" padding="lg" className="text-center">
+            <div className="text-zinc-500">
+              <div className="w-12 h-12 rounded-full bg-zinc-800 flex items-center justify-center mx-auto mb-3">
+                {Icons.history}
+              </div>
+              <p>No transactions yet</p>
+              <p className="text-sm mt-1">Request an airdrop to get started!</p>
+            </div>
+          </Card>
+        ) : (
+          <div className="space-y-2">
+            {transactions.slice(0, 3).map((tx) => (
+              <a
+                key={tx.signature}
+                href={`https://explorer.solana.com/tx/${tx.signature}?cluster=devnet`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Card variant="interactive" padding="sm">
+                  <div className="flex items-center gap-3">
+                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${
+                      tx.err ? 'bg-red-500/10 text-red-400' : 'bg-green-500/10 text-green-400'
+                    }`}>
+                      {tx.err ? '✕' : '✓'}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-mono text-white truncate">
+                        {shortenAddress(tx.signature, 8)}
+                      </p>
+                      <p className="text-xs text-zinc-500">
+                        {tx.blockTime 
+                          ? new Date(tx.blockTime * 1000).toLocaleString()
+                          : 'Pending...'}
+                      </p>
+                    </div>
+                    <Badge variant={tx.err ? 'error' : 'success'}>
+                      {tx.err ? 'Failed' : 'Success'}
+                    </Badge>
+                  </div>
+                </Card>
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Info Card */}
+      <Card variant="glass" padding="md">
+        <div className="flex items-start gap-4">
+          <div className="p-2 bg-blue-500/10 rounded-xl text-blue-400 flex-shrink-0">
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <p className="text-sm text-zinc-300 font-medium">About Devnet</p>
+            <p className="text-sm text-zinc-500 mt-1">
+              Solana Devnet is a testing network where you can experiment with dApps risk-free. 
+              SOL on devnet has no real value and can be obtained freely via airdrops.
+            </p>
+          </div>
+        </div>
+      </Card>
     </div>
   );
 }
-
-export default Dashboard;

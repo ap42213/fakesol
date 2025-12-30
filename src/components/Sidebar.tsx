@@ -2,6 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useWalletStore } from '../store/walletStore';
 import { useAuthStore } from '../store/authStore';
 import { Icons, Badge } from './ui/index';
+import { Logo } from './Logo';
 import { WalletSwitcher } from './WalletSwitcher';
 import { FiLogOut, FiUser } from 'react-icons/fi';
 
@@ -64,9 +65,7 @@ export function Sidebar() {
         {/* Logo */}
         <div className="h-16 flex items-center px-6 border-b border-zinc-800/50">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-green-400 flex items-center justify-center">
-              <span className="text-white">{Icons.solana}</span>
-            </div>
+            <Logo size="lg" />
             <div>
               <span className="font-bold text-white text-lg">FakeSOL</span>
               <Badge variant="warning" >Devnet</Badge>
