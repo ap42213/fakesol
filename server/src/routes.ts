@@ -307,14 +307,13 @@ router.post('/wallet/:address/airdrop', async (req: Request, res: Response) => {
   try {
     const { address } = req.params;
     const { amount = 1 } = req.body;
-    const clientIp = req.ip || req.socket.remoteAddress || 'unknown';
     
     if (!isValidAddress(address)) {
       return res.status(400).json({ error: 'Invalid Solana address' });
     }
     
-    // Check rate limit
-    const lastAirdrop = airdropCooldowns.get(clientIp);
+    // Check rate limit (by wallet address)
+    const lastAirdrop = airdropCooldowns.get(address);
     if (lastAirdrop && Date.now() - lastAirdrop < AIRDROP_COOLDOWN) {
       const waitTime = Math.ceil((AIRDROP_COOLDOWN - (Date.now() - lastAirdrop)) / 1000);
       return res.status(429).json({ 
@@ -326,8 +325,8 @@ router.post('/wallet/:address/airdrop', async (req: Request, res: Response) => {
     
     const result = await requestAirdrop(address, amount);
     
-    // Update rate limit
-    airdropCooldowns.set(clientIp, Date.now());
+    // Update rate limit (by wallet address)
+    airdropCooldowns.set(address, Date.now());
     
     res.json({
       success: true,
