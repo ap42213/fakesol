@@ -1,17 +1,13 @@
 FROM node:20-slim
 
-WORKDIR /app
+WORKDIR /app/server
 
-# Copy package files
-COPY package*.json ./
-COPY server/package*.json ./server/
-
-# Install dependencies
+# Install server dependencies (includes tsx)
+COPY server/package*.json ./
 RUN npm install
-RUN cd server && npm install
 
-# Copy source
-COPY . .
+# Copy server source
+COPY server/ ./
 
-# Run refill script with tsx
-CMD ["npx", "tsx", "server/scripts/refillTreasury.ts"]
+# Run refill script
+CMD ["npx", "tsx", "scripts/refillTreasury.ts"]

@@ -4,6 +4,10 @@ try { require('dotenv/config'); } catch {}
 import { Connection, Keypair, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import bs58 from 'bs58';
 
+// Non-sensitive fallback so cron can still run even if Railway variable scoping is misconfigured.
+// If you rotate the treasury, set TREASURY_PUBLIC_KEY (recommended) or TREASURY_SECRET_KEY.
+const DEFAULT_TREASURY_PUBLIC_KEY = 'DfvJb314rHHa2Xe7aGZfhTtXDdh4GYSHcQaBLNEgtMK';
+
 console.log('🔄 Treasury Refill Script Starting...');
 console.log(
   `   Env: NODE_ENV=${process.env.NODE_ENV || '(unset)'} ` +
@@ -33,17 +37,14 @@ const getTreasuryPubkey = (): PublicKey => {
       `TREASURY_SECRET_KEY=${hasTreasurySecret ? 'set' : 'missing'}`,
   );
 
-  if (process.env.TREASURY_PUBLIC_KEY) {
+  if (process.env.TREASURY_PUBLIC_KEY?.trim()) {
     console.log(`   Using TREASURY_PUBLIC_KEY`);
-    return new PublicKey(process.env.TREASURY_PUBLIC_KEY);
+    return new PublicKey(process.env.TREASURY_PUBLIC_KEY.trim());
   }
   const secret = process.env.TREASURY_SECRET_KEY;
   if (!secret) {
-    console.error('❌ TREASURY_PUBLIC_KEY or TREASURY_SECRET_KEY required');
-    console.error(
-      '   Railway tip: variables are scoped per service + environment. Add TREASURY_SECRET_KEY to the CRON service Variables tab (Production environment), or set it as a Shared Variable.',
-    );
-    process.exit(1);
+    console.warn('⚠️ TREASURY_PUBLIC_KEY / TREASURY_SECRET_KEY missing; falling back to DEFAULT_TREASURY_PUBLIC_KEY');
+    return new PublicKey(DEFAULT_TREASURY_PUBLIC_KEY);
   }
   console.log(`   Using TREASURY_SECRET_KEY`);
   const kp = Keypair.fromSecretKey(bs58.decode(secret.trim()));
