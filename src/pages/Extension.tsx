@@ -115,15 +115,16 @@ export function Extension() {
                 )}
                 
                 {step.number === 3 && (
-                  <a
-                    href="chrome://extensions"
-                    target="_blank"
-                    rel="noreferrer"
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText('chrome://extensions');
+                      alert('Copied "chrome://extensions" to clipboard!\n\nPaste it in your browser address bar to open the Extensions page.');
+                    }}
                     className="inline-flex items-center gap-2 mt-3 px-4 py-2 bg-background-card hover:bg-white/10 text-white rounded-xl transition-colors border border-white/10"
                   >
-                    <FiExternalLink />
-                    Open Extensions Page
-                  </a>
+                    <FiCopy />
+                    Copy Extensions URL
+                  </button>
                 )}
               </div>
             </div>
@@ -160,14 +161,8 @@ export function Extension() {
         </div>
       )}
 
-      {/* Video Tutorial Placeholder */}
+      {/* Help Link */}
       <div className="glass-card p-6 text-center">
-        <div className="aspect-video bg-background-card rounded-xl flex items-center justify-center border border-white/10 mb-4">
-          <div className="text-center">
-            <span className="text-4xl mb-2 block">🎬</span>
-            <p className="text-text-muted">Video tutorial coming soon</p>
-          </div>
-        </div>
         <p className="text-sm text-text-muted">
           Need help? Check out our <a href="https://github.com/ap42213/fakesol" className="text-primary hover:underline">GitHub documentation</a>
         </p>
