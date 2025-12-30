@@ -41,7 +41,7 @@ export function Login() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center mb-6">
-            <Logo size="xl" className="shadow-2xl shadow-purple-500/30" />
+            <Logo size="xl" />
           </div>
           <h1 className="text-4xl font-extrabold text-white mb-2">FakeSOL</h1>
           <p className="text-zinc-400 text-lg">Welcome Back</p>
