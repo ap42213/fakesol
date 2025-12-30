@@ -22,6 +22,7 @@ export function Dashboard() {
   
   const { showToast } = useToast();
   const [airdropLoading, setAirdropLoading] = useState(false);
+  const [copiedSig, setCopiedSig] = useState<string | null>(null);
 
   useEffect(() => {
     refreshBalance();
@@ -41,6 +42,25 @@ export function Dashboard() {
     } finally {
       setAirdropLoading(false);
     }
+  };
+
+  const formatTimeAgo = (timestamp?: number | null) => {
+    if (!timestamp) return 'Pending…';
+    const seconds = Math.floor((Date.now() - timestamp * 1000) / 1000);
+    if (seconds < 60) return `${seconds}s ago`;
+    const minutes = Math.floor(seconds / 60);
+    if (minutes < 60) return `${minutes}m ago`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours}h ago`;
+    const days = Math.floor(hours / 24);
+    return `${days}d ago`;
+  };
+
+  const handleCopySignature = async (sig: string) => {
+    await navigator.clipboard.writeText(sig);
+    setCopiedSig(sig);
+    showToast('Signature copied', 'success');
+    setTimeout(() => setCopiedSig((prev) => (prev === sig ? null : prev)), 1500);
   };
 
   return (
@@ -203,14 +223,25 @@ export function Dashboard() {
                         {shortenAddress(tx.signature, 8)}
                       </p>
                       <p className="text-xs text-zinc-500">
-                        {tx.blockTime 
-                          ? new Date(tx.blockTime * 1000).toLocaleString()
-                          : 'Pending...'}
+                        {formatTimeAgo(tx.blockTime)}
                       </p>
                     </div>
-                    <Badge variant={tx.err ? 'error' : 'success'}>
-                      {tx.err ? 'Failed' : 'Success'}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant={tx.err ? 'error' : 'success'}>
+                        {tx.err ? 'Failed' : 'Success'}
+                      </Badge>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          handleCopySignature(tx.signature);
+                        }}
+                        className="p-2 text-zinc-400 hover:text-white hover:bg-zinc-800 rounded-lg transition-colors"
+                        aria-label="Copy signature"
+                      >
+                        {copiedSig === tx.signature ? 'Copied' : Icons.copy}
+                      </button>
+                    </div>
                   </div>
                 </Card>
               </a>

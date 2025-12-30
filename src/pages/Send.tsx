@@ -20,6 +20,8 @@ export function Send() {
   const [success, setSuccess] = useState(false);
   const [txSignature, setTxSignature] = useState('');
 
+  const feeBuffer = 0.0005;
+
   const validateForm = (): boolean => {
     let valid = true;
     clearError();
@@ -41,8 +43,8 @@ export function Send() {
     } else if (isNaN(amountNum) || amountNum <= 0) {
       setAmountError('Amount must be greater than 0');
       valid = false;
-    } else if (amountNum > balance) {
-      setAmountError('Insufficient balance');
+    } else if (amountNum > Math.max(0, balance - feeBuffer)) {
+      setAmountError('Insufficient balance after fees');
       valid = false;
     } else {
       setAmountError('');
@@ -65,8 +67,13 @@ export function Send() {
   };
 
   const handleMaxAmount = () => {
-    const maxAmount = Math.max(0, balance - 0.001);
+    const maxAmount = Math.max(0, balance - feeBuffer);
     setAmount(maxAmount.toFixed(6));
+    setAmountError('');
+  };
+
+  const handlePreset = (val: number) => {
+    setAmount(val.toString());
     setAmountError('');
   };
 
@@ -169,6 +176,20 @@ export function Send() {
                 MAX
               </button>
             </div>
+
+            <div className="flex flex-wrap gap-2 mb-3">
+              {[0.1, 0.5, 1].map((val) => (
+                <button
+                  key={val}
+                  type="button"
+                  onClick={() => handlePreset(val)}
+                  className="px-3 py-1 rounded-lg bg-zinc-800 text-xs text-zinc-300 hover:bg-zinc-700 transition-colors"
+                >
+                  {val} SOL
+                </button>
+              ))}
+            </div>
+
             <Input
               placeholder="0.00"
               type="number"
@@ -190,7 +211,7 @@ export function Send() {
           {/* Fee Estimate */}
           <div className="flex items-center justify-between py-3 border-t border-zinc-800">
             <span className="text-sm text-zinc-500">Estimated Fee</span>
-            <span className="text-sm text-zinc-300">~0.000005 SOL</span>
+            <span className="text-sm text-zinc-300">~0.000005 SOL (buffer {feeBuffer} SOL)</span>
           </div>
 
           <Button
