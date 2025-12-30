@@ -4,7 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import { Icons, Badge } from './ui/index';
 import { Logo } from './Logo';
 import { WalletSwitcher } from './WalletSwitcher';
-import { FiLogOut, FiUser, FiMail, FiCopy } from 'react-icons/fi';
+import { FiLogOut, FiUser } from 'react-icons/fi';
 
 const TokenIcon = (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
