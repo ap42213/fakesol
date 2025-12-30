@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { FiMail, FiLock, FiTag, FiAlertCircle, FiCheck, FiUser } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
-import { Logo } from '../components/Logo';
+import { LogoWithText } from '../components/Logo';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -60,7 +60,7 @@ export function Register() {
         {/* Logo */}
         <div className="text-center mb-8">
           <div className="inline-flex items-center justify-center mb-4">
-            <Logo size="xl" />
+            <LogoWithText size="xl" />
           </div>
           <h1 className="text-2xl font-bold gradient-text">Create Account</h1>
           <p className="text-text-muted mt-2">Sign up to save your wallets securely</p>
