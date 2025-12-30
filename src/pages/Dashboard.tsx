@@ -34,8 +34,8 @@ export function Dashboard() {
     setAirdropLoading(true);
     clearError();
     try {
-      await requestAirdrop(1);
-      showToast('Airdrop successful! +1 SOL', 'success');
+      await requestAirdrop(5);
+      showToast('Airdrop successful! +5 SOL', 'success');
     } catch (err: any) {
       showToast(err.message || 'Airdrop failed', 'error');
     } finally {

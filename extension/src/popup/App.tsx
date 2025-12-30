@@ -106,7 +106,7 @@ export default function App() {
     setAirdropping(true);
     try {
       const pubKey = new PublicKey(publicKey);
-      const signature = await connection.requestAirdrop(pubKey, LAMPORTS_PER_SOL);
+      const signature = await connection.requestAirdrop(pubKey, 5 * LAMPORTS_PER_SOL);
       await connection.confirmTransaction(signature);
       await fetchBalance(pubKey);
     } catch (e) {
