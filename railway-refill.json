@@ -4,6 +4,6 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "npm run refill:treasury"
+    "startCommand": "node refill.mjs"
   }
 }
