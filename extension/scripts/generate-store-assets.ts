@@ -225,29 +225,29 @@ async function createScreenshot2() {
       <rect x="450" y="100" width="380" height="600" rx="16" fill="url(#popupBg2)" stroke="#333" stroke-width="1"/>
       
       <!-- Popup header -->
-      <text x="640" y="155" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-weight="bold" font-size="28">Import Wallet</text>
-      <text x="640" y="185" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="14">Enter your private key from fakesol.com</text>
+      <text x="640" y="205" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-weight="bold" font-size="28">Import Wallet</text>
+      <text x="640" y="235" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="14">Enter your private key from fakesol.com</text>
       
       <!-- Private key input -->
-      <text x="480" y="240" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="13">Private Key</text>
-      <rect x="480" y="250" width="320" height="100" rx="8" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
-      <text x="500" y="290" fill="#71717a" font-family="monospace" font-size="12">4wBqpZM9xwH...</text>
-      <text x="500" y="310" fill="#71717a" font-family="monospace" font-size="12">kL8mNpQrS2v...</text>
-      <text x="500" y="330" fill="#71717a" font-family="monospace" font-size="12">xYz7AbCdEfG...</text>
+      <text x="480" y="290" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="13">Private Key</text>
+      <rect x="480" y="300" width="320" height="100" rx="8" fill="#27272a" stroke="#3f3f46" stroke-width="1"/>
+      <text x="500" y="340" fill="#71717a" font-family="monospace" font-size="12">4wBqpZM9xwH...</text>
+      <text x="500" y="360" fill="#71717a" font-family="monospace" font-size="12">kL8mNpQrS2v...</text>
+      <text x="500" y="380" fill="#71717a" font-family="monospace" font-size="12">xYz7AbCdEfG...</text>
       
       <!-- Instructions -->
-      <text x="640" y="400" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="13">1. Go to fakesol.com</text>
-      <text x="640" y="425" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="13">2. Create or view your wallet</text>
-      <text x="640" y="450" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="13">3. Copy your private key</text>
-      <text x="640" y="475" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="13">4. Paste it here</text>
+      <text x="640" y="450" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="13">1. Go to fakesol.com</text>
+      <text x="640" y="475" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="13">2. Create or view your wallet</text>
+      <text x="640" y="500" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="13">3. Copy your private key</text>
+      <text x="640" y="525" text-anchor="middle" fill="#a1a1aa" font-family="Arial, sans-serif" font-size="13">4. Paste it here</text>
       
       <!-- Import button -->
-      <rect x="480" y="520" width="320" height="50" rx="8" fill="#9945FF"/>
-      <text x="640" y="552" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Import Wallet</text>
+      <rect x="480" y="570" width="320" height="50" rx="8" fill="#9945FF"/>
+      <text x="640" y="602" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="16" font-weight="bold">Import Wallet</text>
       
       <!-- Security note -->
-      <rect x="480" y="590" width="320" height="50" rx="8" fill="#eab308" fill-opacity="0.1"/>
-      <text x="640" y="618" text-anchor="middle" fill="#eab308" font-family="Arial, sans-serif" font-size="11">Devnet only - Never use with real funds</text>
+      <rect x="480" y="640" width="320" height="40" rx="8" fill="#eab308" fill-opacity="0.1"/>
+      <text x="640" y="665" text-anchor="middle" fill="#eab308" font-family="Arial, sans-serif" font-size="11">Devnet only - Never use with real funds</text>
       
       <!-- Side callouts -->
       <text x="100" y="350" fill="#9945FF" font-family="Arial, sans-serif" font-size="20" font-weight="bold">Easy Import</text>

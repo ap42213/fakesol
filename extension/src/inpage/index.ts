@@ -1,11 +1,12 @@
 import EventEmitter from 'eventemitter3';
-import { PublicKey, Transaction, VersionedTransaction } from '@solana/web3.js';
+import { PublicKey, Transaction, VersionedTransaction, Connection } from '@solana/web3.js';
 import bs58 from 'bs58';
 import { Buffer } from 'buffer';
 
 class FakeSolProvider extends EventEmitter {
   publicKey: PublicKey | null = null;
   isConnected: boolean = false;
+  isPhantom: boolean = true;
 
   constructor() {
     super();
@@ -13,6 +14,7 @@ class FakeSolProvider extends EventEmitter {
     this.disconnect = this.disconnect.bind(this);
     this.signTransaction = this.signTransaction.bind(this);
     this.signAllTransactions = this.signAllTransactions.bind(this);
+    this.signAndSendTransaction = this.signAndSendTransaction.bind(this);
     this.signMessage = this.signMessage.bind(this);
   }
 
@@ -36,8 +38,16 @@ class FakeSolProvider extends EventEmitter {
   }
 
   async signTransaction<T extends Transaction | VersionedTransaction>(transaction: T): Promise<T> {
+    let messageToSign: Uint8Array;
+
+    if (transaction instanceof VersionedTransaction) {
+      messageToSign = transaction.message.serialize();
+    } else {
+      messageToSign = (transaction as Transaction).serializeMessage();
+    }
+
     const response = await this._request('signTransaction', {
-      message: bs58.encode(transaction.serialize({ requireAllSignatures: false, verifySignatures: false })),
+      message: bs58.encode(messageToSign),
     });
 
     const signature = bs58.decode(response.signature);
@@ -57,6 +67,19 @@ class FakeSolProvider extends EventEmitter {
       signedTransactions.push(await this.signTransaction(tx));
     }
     return signedTransactions;
+  }
+
+  async signAndSendTransaction<T extends Transaction | VersionedTransaction>(
+    transaction: T,
+    options?: any
+  ): Promise<{ signature: string }> {
+    const signedTx = await this.signTransaction(transaction);
+    const connection = new Connection('https://api.devnet.solana.com');
+    
+    const rawTransaction = signedTx.serialize();
+    const signature = await connection.sendRawTransaction(rawTransaction, options);
+    
+    return { signature };
   }
 
   async signMessage(message: Uint8Array, display?: string): Promise<{ signature: Uint8Array; publicKey: PublicKey }> {

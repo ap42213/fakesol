@@ -1,8 +1,11 @@
 // API client for FakeSOL backend
 // In production, API is served from same origin. In dev, use localhost:3001
-const API_BASE = import.meta.env.VITE_API_URL 
-  ? `${import.meta.env.VITE_API_URL}/api`
-  : '/api';
+const getApiBase = () => {
+  const envUrl = (window as any).__ENV__?.VITE_API_URL || import.meta.env.VITE_API_URL;
+  return envUrl ? `${envUrl}/api` : '/api';
+};
+
+const API_BASE = getApiBase();
 
 interface ApiResponse<T> {
   data?: T;

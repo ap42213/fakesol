@@ -325,7 +325,7 @@ if (githubEnabled) {
 router.get('/providers', (_req: Request, res: Response) => {
   res.json({
     google: googleEnabled,
-    github: !!(process.env.GITHUB_CLIENT_ID && process.env.GITHUB_CLIENT_SECRET),
+    github: githubEnabled,
   });
 });
 

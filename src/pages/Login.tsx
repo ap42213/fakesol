@@ -5,7 +5,8 @@ import { FiAlertCircle, FiUser, FiGithub } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { Logo } from '../components/Logo';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// Use runtime env if available, otherwise build time env, otherwise default based on mode
+const API_URL = (window as any).__ENV__?.VITE_API_URL || import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
 
 export function Login() {
   const navigate = useNavigate();
@@ -13,14 +14,14 @@ export function Login() {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [oauthProviders, setOauthProviders] = useState<{ google: boolean; github: boolean }>({ google: true, github: true });
+  const [oauthProviders, setOauthProviders] = useState<{ google: boolean; github: boolean }>({ google: false, github: false });
 
   useEffect(() => {
     // Check available OAuth providers
     fetch(`${API_URL}/api/oauth/providers`)
       .then(res => res.json())
       .then(data => setOauthProviders(data))
-      .catch(() => {});
+      .catch(() => setOauthProviders({ google: false, github: false }));
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
