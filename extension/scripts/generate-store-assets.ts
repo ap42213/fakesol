@@ -32,17 +32,22 @@ async function createPromoTile() {
       </defs>
       <rect width="${width}" height="${height}" fill="url(#bg)"/>
       
-      <!-- Icon -->
-      <rect x="170" y="60" width="100" height="100" rx="20" fill="url(#accent)"/>
-      <text x="220" y="130" text-anchor="middle" fill="white" font-family="Arial" font-weight="bold" font-size="50">F</text>
+      <!-- Wallet Icon -->
+      <rect x="170" y="40" width="100" height="100" rx="20" fill="url(#accent)"/>
+      <!-- Wallet body -->
+      <rect x="190" y="60" width="60" height="45" rx="6" fill="white" fill-opacity="0.95"/>
+      <rect x="190" y="55" width="60" height="15" rx="4" fill="white" fill-opacity="0.7"/>
+      <rect x="225" y="75" width="18" height="12" rx="3" fill="url(#accent)"/>
+      <circle cx="205" cy="82" r="8" fill="#9945FF" fill-opacity="0.8"/>
+      <circle cx="212" cy="88" r="6" fill="#14F195" fill-opacity="0.8"/>
       
       <!-- Title -->
-      <text x="220" y="200" text-anchor="middle" fill="white" font-family="Arial" font-weight="bold" font-size="28">FakeSOL</text>
-      <text x="220" y="230" text-anchor="middle" fill="#a1a1aa" font-family="Arial" font-size="14">Devnet Wallet for Developers</text>
+      <text x="220" y="175" text-anchor="middle" fill="white" font-family="Arial" font-weight="bold" font-size="28">FakeSOL</text>
+      <text x="220" y="205" text-anchor="middle" fill="#a1a1aa" font-family="Arial" font-size="14">Devnet Wallet for Developers</text>
       
       <!-- Badge -->
-      <rect x="175" y="245" width="90" height="24" rx="12" fill="#eab308" fill-opacity="0.2"/>
-      <text x="220" y="262" text-anchor="middle" fill="#eab308" font-family="Arial" font-size="11" font-weight="bold">DEVNET ONLY</text>
+      <rect x="175" y="220" width="90" height="24" rx="12" fill="#eab308" fill-opacity="0.2"/>
+      <text x="220" y="237" text-anchor="middle" fill="#eab308" font-family="Arial" font-size="11" font-weight="bold">DEVNET ONLY</text>
     </svg>
   `;
 
@@ -77,18 +82,23 @@ async function createMarqueeTile() {
       <circle cx="200" cy="280" r="300" fill="#9945FF" fill-opacity="0.1"/>
       <circle cx="1200" cy="280" r="300" fill="#14F195" fill-opacity="0.1"/>
       
-      <!-- Icon -->
-      <rect x="600" y="120" width="200" height="200" rx="40" fill="url(#accent2)"/>
-      <text x="700" y="260" text-anchor="middle" fill="white" font-family="Arial" font-weight="bold" font-size="100">F</text>
+      <!-- Wallet Icon -->
+      <rect x="600" y="80" width="200" height="200" rx="40" fill="url(#accent2)"/>
+      <!-- Wallet body -->
+      <rect x="640" y="120" width="120" height="90" rx="12" fill="white" fill-opacity="0.95"/>
+      <rect x="640" y="110" width="120" height="30" rx="8" fill="white" fill-opacity="0.7"/>
+      <rect x="710" y="150" width="36" height="24" rx="6" fill="url(#accent2)"/>
+      <circle cx="670" cy="165" r="16" fill="#9945FF" fill-opacity="0.8"/>
+      <circle cx="684" cy="177" r="12" fill="#14F195" fill-opacity="0.8"/>
       
       <!-- Title -->
-      <text x="700" y="400" text-anchor="middle" fill="white" font-family="Arial" font-weight="bold" font-size="56">FakeSOL Wallet</text>
-      <text x="700" y="450" text-anchor="middle" fill="#a1a1aa" font-family="Arial" font-size="24">The Devnet-Only Solana Wallet for Developers</text>
+      <text x="700" y="350" text-anchor="middle" fill="white" font-family="Arial" font-weight="bold" font-size="56">FakeSOL Wallet</text>
+      <text x="700" y="400" text-anchor="middle" fill="#a1a1aa" font-family="Arial" font-size="24">The Devnet-Only Solana Wallet for Developers</text>
       
       <!-- Features -->
-      <text x="400" y="510" text-anchor="middle" fill="#9945FF" font-family="Arial" font-size="16">🔌 Connect to dApps</text>
-      <text x="700" y="510" text-anchor="middle" fill="#14F195" font-family="Arial" font-size="16">✍️ Sign Transactions</text>
-      <text x="1000" y="510" text-anchor="middle" fill="#eab308" font-family="Arial" font-size="16">🛡️ Devnet Only</text>
+      <text x="400" y="480" text-anchor="middle" fill="#9945FF" font-family="Arial" font-size="18">🔌 Connect to dApps</text>
+      <text x="700" y="480" text-anchor="middle" fill="#14F195" font-family="Arial" font-size="18">✍️ Sign Transactions</text>
+      <text x="1000" y="480" text-anchor="middle" fill="#eab308" font-family="Arial" font-size="18">🛡️ Devnet Only</text>
     </svg>
   `;
 
