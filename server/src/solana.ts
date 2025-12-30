@@ -20,6 +20,24 @@ const RPC_URLS = (process.env.SOLANA_RPC_URLS || process.env.SOLANA_RPC_URL || '
 let rpcIndex = 0;
 const connections = new Map<string, Connection>();
 
+// Lightweight airdrop queue to smooth bursts and avoid RPC rate limits
+const AIRDROP_DELAY_MS = 200;
+let airdropQueue: Promise<void> = Promise.resolve();
+
+const queueAirdrop = async <T>(fn: () => Promise<T>): Promise<T> => {
+  const run = async () => {
+    const result = await fn();
+    // Small delay between airdrops to reduce 429s
+    await new Promise((resolve) => setTimeout(resolve, AIRDROP_DELAY_MS));
+    return result;
+  };
+
+  const queued = airdropQueue.then(run, run);
+  // Update queue regardless of success/failure so it doesn’t stall
+  airdropQueue = queued.then(() => undefined, () => undefined);
+  return queued;
+};
+
 export const getRpcEndpoint = () => {
   const endpoint = RPC_URLS[rpcIndex % RPC_URLS.length];
   rpcIndex += 1;
@@ -77,39 +95,44 @@ export const requestAirdrop = async (
   const maxRetries = 4;
   let lastError: any;
 
-  for (let attempt = 0; attempt < maxRetries; attempt++) {
-    const endpoint = getRpcEndpoint();
-    const conn = getConnection(endpoint);
+  const runOnce = async () => {
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      const endpoint = getRpcEndpoint();
+      const conn = getConnection(endpoint);
 
-    try {
-      const signature = await conn.requestAirdrop(
-        publicKey,
-        cappedAmount * LAMPORTS_PER_SOL
-      );
-      
-      const latestBlockhash = await conn.getLatestBlockhash('confirmed');
-      await conn.confirmTransaction({
-        signature,
-        blockhash: latestBlockhash.blockhash,
-        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-      }, 'finalized');
-      
-      return { signature, amount: cappedAmount };
-    } catch (error: any) {
-      lastError = error;
-      const isRateLimited = error.message?.includes('429') || error.message?.toLowerCase().includes('rate limit');
-      // Rotate endpoint and back off before retrying
-      await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
-      if (!isRateLimited && attempt === maxRetries - 1) {
-        throw error;
+      try {
+        const signature = await conn.requestAirdrop(
+          publicKey,
+          cappedAmount * LAMPORTS_PER_SOL
+        );
+        
+        const latestBlockhash = await conn.getLatestBlockhash('confirmed');
+        await conn.confirmTransaction({
+          signature,
+          blockhash: latestBlockhash.blockhash,
+          lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+        }, 'finalized');
+        
+        return { signature, amount: cappedAmount };
+      } catch (error: any) {
+        lastError = error;
+        const isRateLimited = error.message?.includes('429') || error.message?.toLowerCase().includes('rate limit');
+        // Rotate endpoint and back off before retrying
+        await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+        if (!isRateLimited && attempt === maxRetries - 1) {
+          throw error;
+        }
       }
     }
-  }
 
-  if (lastError?.message?.includes('429')) {
-    throw new Error('RATE_LIMITED');
-  }
-  throw lastError || new Error('Airdrop failed after retries');
+    if (lastError?.message?.includes('429')) {
+      throw new Error('RATE_LIMITED');
+    }
+    throw lastError || new Error('Airdrop failed after retries');
+  };
+
+  // Serialize airdrops to smooth bursts
+  return queueAirdrop(runOnce);
 };
 
 // Send SOL transaction
