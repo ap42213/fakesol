@@ -237,16 +237,8 @@ export default function App() {
       const conn = getConnection();
       try {
         const signature = await conn.requestAirdrop(pubKey, 5 * LAMPORTS_PER_SOL);
-        const latestBlockhash = await conn.getLatestBlockhash('confirmed');
-
-        await conn.confirmTransaction(
-          {
-            signature,
-            blockhash: latestBlockhash.blockhash,
-            lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-          },
-          'finalized'
-        );
+        // Confirm directly on signature to avoid blockhash mismatch issues
+        await conn.confirmTransaction(signature, 'confirmed');
 
         await fetchBalance(pubKey);
         await fetchTransactions(pubKey);
