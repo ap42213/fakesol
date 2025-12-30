@@ -1,10 +1,36 @@
 import { useState, useEffect } from 'react';
 import { Connection, PublicKey, LAMPORTS_PER_SOL, Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
-import { FaWallet, FaCopy, FaExternalLinkAlt } from 'react-icons/fa';
 
 // Devnet connection
 const connection = new Connection('https://api.devnet.solana.com');
+
+function WalletLogo() {
+  return (
+    <img 
+      src="/icons/icon48.png" 
+      alt="FakeSOL" 
+      className="w-10 h-10 rounded-lg"
+    />
+  );
+}
+
+function CopyIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+    </svg>
+  );
+}
+
+function CheckIcon({ className }: { className?: string }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}>
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  );
+}
 
 export default function App() {
   const [hasWallet, setHasWallet] = useState(false);
@@ -12,7 +38,9 @@ export default function App() {
   const [balance, setBalance] = useState<number | null>(null);
   const [publicKey, setPublicKey] = useState<string>('');
   const [loading, setLoading] = useState(false);
+  const [airdropping, setAirdropping] = useState(false);
   const [error, setError] = useState('');
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     checkWallet();
@@ -48,13 +76,11 @@ export default function App() {
     setError('');
 
     try {
-      // Validate key
       const secretKey = bs58.decode(privateKey);
       if (secretKey.length !== 64) throw new Error('Invalid secret key length');
       
       const keypair = Keypair.fromSecretKey(secretKey);
       
-      // Save to storage
       await chrome.storage.local.set({ 
         fakesol_secret_key: privateKey,
         fakesol_public_key: keypair.publicKey.toString()
@@ -64,9 +90,29 @@ export default function App() {
       setHasWallet(true);
       fetchBalance(keypair.publicKey);
     } catch (err) {
-      setError('Invalid private key. Please copy it from the FakeSOL web app.');
+      setError('Invalid private key. Please copy it from fakesol.com');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleCopyAddress = async () => {
+    await navigator.clipboard.writeText(publicKey);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
+  const handleAirdrop = async () => {
+    setAirdropping(true);
+    try {
+      const pubKey = new PublicKey(publicKey);
+      const signature = await connection.requestAirdrop(pubKey, LAMPORTS_PER_SOL);
+      await connection.confirmTransaction(signature);
+      await fetchBalance(pubKey);
+    } catch (e) {
+      console.error('Airdrop failed', e);
+    } finally {
+      setAirdropping(false);
     }
   };
 
@@ -75,108 +121,140 @@ export default function App() {
     setHasWallet(false);
     setPrivateKey('');
     setBalance(null);
+    setPublicKey('');
   };
 
+  const truncatedAddress = publicKey 
+    ? `${publicKey.slice(0, 4)}...${publicKey.slice(-4)}` 
+    : '';
+
+  // Import Wallet View
   if (!hasWallet) {
     return (
-      <div className="p-6 h-full flex flex-col">
-        <div className="flex-1 flex flex-col items-center justify-center text-center">
-          <div className="w-16 h-16 bg-gradient-to-br from-primary to-secondary rounded-2xl flex items-center justify-center mb-6">
-            <FaWallet className="text-white text-3xl" />
+      <div className="w-[360px] h-[500px] bg-[#09090b] flex flex-col">
+        {/* Header */}
+        <div className="flex items-center justify-between p-4 border-b border-zinc-800">
+          <div className="flex items-center gap-2">
+            <WalletLogo />
+            <span className="text-xs font-semibold px-2 py-1 bg-yellow-500/20 text-yellow-500 rounded">
+              DEVNET ONLY
+            </span>
           </div>
-          <h1 className="text-2xl font-bold mb-2">Welcome to FakeSOL</h1>
-          <p className="text-text-muted mb-8">Import your devnet wallet to get started</p>
+        </div>
+
+        {/* Import Wallet Content */}
+        <div className="flex-1 flex flex-col items-center justify-center px-6 gap-6">
+          <div className="text-center">
+            <h2 className="text-xl font-semibold text-white mb-2">Import Wallet</h2>
+            <p className="text-sm text-zinc-400">Enter your private key to import your wallet</p>
+          </div>
 
           <form onSubmit={handleImport} className="w-full space-y-4">
-            <div>
-              <input
-                type="password"
-                value={privateKey}
-                onChange={(e) => setPrivateKey(e.target.value)}
-                placeholder="Paste Private Key (Base58)"
-                className="input-field"
-              />
-            </div>
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-            <button 
-              type="submit" 
-              disabled={!privateKey || loading}
-              className="btn-primary w-full"
+            <textarea
+              value={privateKey}
+              onChange={(e) => setPrivateKey(e.target.value)}
+              placeholder="Enter private key..."
+              className="w-full h-32 bg-zinc-900 border border-zinc-800 rounded-lg px-4 py-3 text-sm text-white placeholder:text-zinc-600 resize-none focus:outline-none focus:ring-2 focus:ring-purple-500"
+            />
+
+            {error && <p className="text-red-500 text-sm text-center">{error}</p>}
+
+            <button
+              type="submit"
+              disabled={!privateKey.trim() || loading}
+              className="w-full bg-purple-600 hover:bg-purple-700 text-white font-medium h-12 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? 'Importing...' : 'Import Wallet'}
             </button>
           </form>
-        </div>
-        <div className="text-center text-xs text-text-muted mt-4">
-          Don't have a wallet? <a href="https://fakesol.com" target="_blank" className="text-primary hover:underline">Create one</a>
+
+          <p className="text-xs text-zinc-500">
+            Don't have a wallet?{' '}
+            <a href="https://fakesol.com" target="_blank" rel="noreferrer" className="text-purple-400 hover:underline">
+              Create one
+            </a>
+          </p>
         </div>
       </div>
     );
   }
 
+  // Wallet View
   return (
-    <div className="h-full flex flex-col bg-background">
+    <div className="w-[360px] h-[500px] bg-[#09090b] flex flex-col">
       {/* Header */}
-      <div className="p-4 border-b border-white/10 flex items-center justify-between bg-background-lighter">
+      <div className="flex items-center justify-between p-4 border-b border-zinc-800">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-gradient-to-br from-primary to-secondary rounded-lg flex items-center justify-center">
-            <span className="font-bold text-white">F</span>
-          </div>
-          <span className="font-bold">FakeSOL</span>
+          <WalletLogo />
+          <span className="text-xs font-semibold px-2 py-1 bg-yellow-500/20 text-yellow-500 rounded">
+            DEVNET ONLY
+          </span>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="px-2 py-1 rounded bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 text-xs font-medium">
-            Devnet
-          </div>
-          <button onClick={handleLogout} className="text-text-muted hover:text-white text-xs">
-            Logout
-          </button>
-        </div>
+        <button
+          onClick={handleLogout}
+          className="text-xs text-zinc-500 hover:text-white transition-colors"
+        >
+          Logout
+        </button>
       </div>
 
-      {/* Main Content */}
-      <div className="flex-1 p-6 flex flex-col items-center">
-        <div className="text-center mb-8">
-          <p className="text-text-muted text-sm mb-1">Total Balance</p>
-          <h2 className="text-4xl font-bold text-white">
-            {balance !== null ? balance.toFixed(4) : '...'} <span className="text-lg text-text-muted">SOL</span>
-          </h2>
+      {/* Wallet Info */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 gap-6">
+        {/* Balance */}
+        <div className="text-center">
+          <p className="text-sm text-zinc-400 mb-2">Total Balance</p>
+          <p className="text-5xl font-bold text-white">
+            {balance !== null ? balance.toFixed(2) : '...'}
+          </p>
+          <p className="text-lg text-zinc-400 mt-1">SOL</p>
         </div>
 
-        <div className="w-full bg-background-card rounded-xl p-4 mb-6 border border-white/5">
-          <p className="text-xs text-text-muted mb-2">Wallet Address</p>
-          <div className="flex items-center justify-between gap-2">
-            <code className="text-sm text-primary truncate">
-              {publicKey.slice(0, 4)}...{publicKey.slice(-4)}
-            </code>
-            <div className="flex gap-2">
-              <button 
-                onClick={() => navigator.clipboard.writeText(publicKey)}
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors text-text-muted hover:text-white"
-                title="Copy Address"
-              >
-                <FaCopy />
-              </button>
-              <a 
-                href={`https://explorer.solana.com/address/${publicKey}?cluster=devnet`}
-                target="_blank"
-                rel="noreferrer"
-                className="p-2 hover:bg-white/10 rounded-lg transition-colors text-text-muted hover:text-white"
-                title="View on Explorer"
-              >
-                <FaExternalLinkAlt />
-              </a>
-            </div>
-          </div>
+        {/* Wallet Address */}
+        <button
+          onClick={handleCopyAddress}
+          className="flex items-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 rounded-lg transition-colors"
+        >
+          <span className="text-sm text-zinc-300 font-mono">{truncatedAddress}</span>
+          {copied ? (
+            <CheckIcon className="w-4 h-4 text-green-500" />
+          ) : (
+            <CopyIcon className="w-4 h-4 text-zinc-400" />
+          )}
+        </button>
+
+        {/* Action Buttons */}
+        <div className="w-full flex gap-3">
+          <button
+            onClick={handleAirdrop}
+            disabled={airdropping}
+            className="flex-1 bg-purple-600 hover:bg-purple-700 text-white font-medium h-12 rounded-lg disabled:opacity-50 transition-colors"
+          >
+            {airdropping ? 'Airdropping...' : 'Airdrop'}
+          </button>
+          <button
+            onClick={handleCopyAddress}
+            className="flex-1 border border-zinc-700 text-white hover:bg-zinc-800 font-medium h-12 rounded-lg bg-transparent transition-colors"
+          >
+            Copy Address
+          </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 w-full">
-          <button className="btn-primary flex items-center justify-center gap-2">
-            Receive
-          </button>
-          <button className="bg-background-card hover:bg-white/10 text-white font-medium py-2 px-4 rounded-xl transition-colors border border-white/10">
-            Send
-          </button>
+        {/* Explorer Link */}
+        <a
+          href={`https://explorer.solana.com/address/${publicKey}?cluster=devnet`}
+          target="_blank"
+          rel="noreferrer"
+          className="text-sm text-purple-400 hover:underline"
+        >
+          View on Explorer →
+        </a>
+      </div>
+
+      {/* Network Indicator */}
+      <div className="p-4 border-t border-zinc-800">
+        <div className="flex items-center justify-center gap-2">
+          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+          <span className="text-sm text-green-500 font-medium">Solana Devnet</span>
         </div>
       </div>
     </div>
