@@ -230,13 +230,20 @@ export default function App() {
     setAirdropping(true);
     const pubKey = new PublicKey(publicKey);
 
-    const maxRetries = 3;
+    const maxRetries = 5;
     let lastError: unknown;
+
+    const describeError = (err: any) => {
+      if (!err) return 'unknown error';
+      if (typeof err === 'string') return err;
+      if (err.message) return err.message;
+      return JSON.stringify(err);
+    };
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       const conn = getConnection();
       try {
-        const signature = await conn.requestAirdrop(pubKey, 5 * LAMPORTS_PER_SOL);
+        const signature = await conn.requestAirdrop(pubKey, 1 * LAMPORTS_PER_SOL);
         // Confirm directly on signature to avoid blockhash mismatch issues
         await conn.confirmTransaction(signature, 'confirmed');
 
@@ -247,12 +254,14 @@ export default function App() {
         return;
       } catch (e) {
         lastError = e;
-        await new Promise((resolve) => setTimeout(resolve, 600 * (attempt + 1)));
+        const delayMs = 800 * (attempt + 1);
+        await new Promise((resolve) => setTimeout(resolve, delayMs));
       }
     }
 
+    const reason = describeError(lastError);
     console.error('Airdrop failed', lastError);
-    showToast('Airdrop failed', 'error');
+    showToast(reason.includes('429') || reason.toLowerCase().includes('rate') ? 'Airdrop rate limited, try again soon' : 'Airdrop failed', 'error');
     setAirdropping(false);
   };
 
