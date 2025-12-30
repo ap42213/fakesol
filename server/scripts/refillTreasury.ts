@@ -1,11 +1,17 @@
-import 'dotenv/config';
-import { Connection, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
+// Load dotenv only if .env file exists (local dev)
+try { require('dotenv/config'); } catch {}
+
+import { Connection, Keypair, PublicKey, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import bs58 from 'bs58';
+
+console.log('🔄 Treasury Refill Script Starting...');
 
 const RPC = (process.env.SOLANA_RPC_URLS || process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com')
   .split(',')
   .map((u) => u.trim())
   .filter(Boolean);
+
+console.log(`   RPC endpoints: ${RPC.join(', ')}`);
 
 const chooseRpc = (() => {
   let i = 0;
@@ -16,12 +22,17 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const getTreasuryPubkey = (): PublicKey => {
   if (process.env.TREASURY_PUBLIC_KEY) {
+    console.log(`   Using TREASURY_PUBLIC_KEY`);
     return new PublicKey(process.env.TREASURY_PUBLIC_KEY);
   }
   const secret = process.env.TREASURY_SECRET_KEY;
-  if (!secret) throw new Error('TREASURY_PUBLIC_KEY or TREASURY_SECRET_KEY required');
-  const kp = bs58.decode(secret.trim());
-  return PublicKey.fromSecretKey(kp);
+  if (!secret) {
+    console.error('❌ TREASURY_PUBLIC_KEY or TREASURY_SECRET_KEY required');
+    process.exit(1);
+  }
+  console.log(`   Using TREASURY_SECRET_KEY`);
+  const kp = Keypair.fromSecretKey(bs58.decode(secret.trim()));
+  return kp.publicKey;
 };
 
 async function main() {
@@ -71,7 +82,18 @@ async function main() {
   console.log(`Run complete. Added ~${added} SOL. Treasury balance: ${finalBalance.toFixed(3)} SOL.`);
 }
 
+// Global error handler
+process.on('uncaughtException', (err) => {
+  console.error('Uncaught Exception:', err);
+  process.exit(1);
+});
+
+process.on('unhandledRejection', (err) => {
+  console.error('Unhandled Rejection:', err);
+  process.exit(1);
+});
+
 main().catch((err) => {
-  console.error(err);
+  console.error('Main error:', err);
   process.exit(1);
 });
