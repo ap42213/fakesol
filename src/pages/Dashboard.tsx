@@ -10,13 +10,6 @@ import { api } from '../lib/api';
 
 const testerSpotlight = [
   {
-    name: 'Anchor Playground',
-    description: 'Spin up and test programs on devnet with browser-based deployment.',
-    url: 'https://anchor.projectserum.com/',
-    incentive: '@projectserum',
-    tag: 'Development',
-  },
-  {
     name: 'Solana Explorer (devnet)',
     description: 'Verify transactions, tokens, and programs on the devnet cluster.',
     url: 'https://explorer.solana.com/?cluster=devnet',
