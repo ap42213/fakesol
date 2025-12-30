@@ -230,9 +230,19 @@ export function Welcome() {
           </>
         )}
 
-        <p className="text-center text-zinc-600 text-xs mt-8">
-          Built for developers • Open source
-        </p>
+        <div className="mt-8 text-center space-y-4">
+          <p className="text-zinc-600 text-xs">
+            Built for developers • Open source
+          </p>
+          <div className="flex items-center justify-center gap-4 text-xs text-zinc-500">
+             <a href="https://x.com/FakeSolWallet" target="_blank" rel="noopener noreferrer" className="hover:text-zinc-300 transition-colors">X (Twitter)</a>
+             <span>•</span>
+             <a href="mailto:hello@fakesol.com" className="hover:text-zinc-300 transition-colors">Contact</a>
+          </div>
+          <div className="text-[10px] text-zinc-600">
+            <p>Treasury: DfvJb314rHHa2Xe7aGZfhTtXDdh4GYSHcQaBLNEgtMK</p>
+          </div>
+        </div>
       </div>
 
       {/* Backup Modal */}
