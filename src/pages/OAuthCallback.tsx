@@ -19,11 +19,8 @@ export function OAuthCallback() {
     }
 
     if (token) {
-      // Store token and check auth
-      localStorage.setItem('fakesol-auth', JSON.stringify({ 
-        state: { token, activeWalletId: null },
-        version: 0 
-      }));
+      // Manually set the token in the store state to ensure persistence
+      useAuthStore.setState({ token });
       
       checkAuth().then(() => {
         navigate('/dashboard');

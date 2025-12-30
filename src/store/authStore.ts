@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// Use runtime env if available, otherwise build time env, otherwise default based on mode
+const API_URL = (window as any).__ENV__?.VITE_API_URL || import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
 
 interface User {
   id: string;
