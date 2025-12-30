@@ -12,23 +12,29 @@ import { TOKEN_PROGRAM_ID, AccountLayout } from '@solana/spl-token';
 import bs58 from 'bs58';
 
 // Support multiple RPC URLs (comma-separated) for better airdrop reliability
-const RPC_URLS = (process.env.SOLANA_RPC_URLS || process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com')
+const RPC_URLS_RAW = (process.env.SOLANA_RPC_URLS || process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com')
   .split(',')
   .map((url) => url.trim())
   .filter(Boolean);
+
+// Always include the public devnet RPC as a fallback (appended if not provided)
+const RPC_URLS = RPC_URLS_RAW.includes('https://api.devnet.solana.com')
+  ? RPC_URLS_RAW
+  : [...RPC_URLS_RAW, 'https://api.devnet.solana.com'];
 
 let rpcIndex = 0;
 const connections = new Map<string, Connection>();
 
 // Lightweight airdrop queue to smooth bursts and avoid RPC rate limits
-const AIRDROP_DELAY_MS = 200;
+const AIRDROP_DELAY_MS = 1000; // base delay between airdrops
 let airdropQueue: Promise<void> = Promise.resolve();
 
 const queueAirdrop = async <T>(fn: () => Promise<T>): Promise<T> => {
   const run = async () => {
     const result = await fn();
-    // Small delay between airdrops to reduce 429s
-    await new Promise((resolve) => setTimeout(resolve, AIRDROP_DELAY_MS));
+    // Delay with small jitter to reduce burstiness
+    const jitter = Math.floor(Math.random() * 500);
+    await new Promise((resolve) => setTimeout(resolve, AIRDROP_DELAY_MS + jitter));
     return result;
   };
 
