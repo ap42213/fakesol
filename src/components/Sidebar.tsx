@@ -116,54 +116,6 @@ export function Sidebar() {
           ))}
         </nav>
 
-        {/* Community & Treasury */}
-        <div className="px-4 py-4 border-t border-zinc-800/50 space-y-4">
-           <div>
-             <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider mb-2">Community</p>
-             <div className="space-y-2">
-               <a href="https://x.com/FakeSolWallet" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors">
-                 <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"></path></svg>
-                 @FakeSolWallet
-               </a>
-               <a href="mailto:hello@fakesol.com" className="flex items-center gap-2 text-sm text-zinc-400 hover:text-white transition-colors">
-                 <FiMail className="w-4 h-4" />
-                 hello@fakesol.com
-               </a>
-             </div>
-           </div>
-           
-           <div>
-             <p className="text-xs text-zinc-500 mb-1">Return unused <span className="text-purple-400 font-semibold">Devnet</span> SOL:</p>
-             <button 
-               onClick={() => {
-                 navigator.clipboard.writeText('DfvJb314rHHa2Xe7aGZfhTtXDdh4GYSHcQaBLNEgtMK');
-                 // You might want to add a toast notification here
-               }}
-               className="w-full flex items-center justify-between p-2 bg-zinc-800/50 hover:bg-zinc-800 rounded-lg group transition-colors text-left"
-               title="Copy Treasury Address"
-             >
-                <span className="text-xs text-zinc-400 font-mono truncate">DfvJ...gtMK</span>
-                <FiCopy className="w-3 h-3 text-zinc-500 group-hover:text-white transition-colors" />
-             </button>
-             <p className="text-[10px] text-zinc-600 mt-1 italic">⚠️ Do not send real SOL</p>
-           </div>
-
-           <div>
-             <p className="text-xs text-zinc-500 mb-1">Buy <a href="https://x.com/hardhatroq" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">@hardhatroq</a> a coffee ☕️:</p>
-             <button 
-               onClick={() => {
-                 navigator.clipboard.writeText('FfD6D7PqWxPgJyDG4wcwGkzubqUg6wDE8jhfjJxC7MQv');
-               }}
-               className="w-full flex items-center justify-between p-2 bg-zinc-800/50 hover:bg-zinc-800 rounded-lg group transition-colors text-left"
-               title="Copy Donation Address"
-             >
-                <span className="text-xs text-zinc-400 font-mono truncate">FfD6...MQv</span>
-                <FiCopy className="w-3 h-3 text-zinc-500 group-hover:text-white transition-colors" />
-             </button>
-             <p className="text-[10px] text-zinc-600 mt-1 italic">Real SOL (Mainnet)</p>
-           </div>
-        </div>
-
         {/* Network Status */}
         <div className="px-4 py-4 border-t border-zinc-800/50 space-y-3">
           <div className="flex items-center justify-between text-sm">
