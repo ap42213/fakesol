@@ -293,8 +293,26 @@ export function Explore() {
   const [searchQuery, setSearchQuery] = useState('');
   const [sortByNew, setSortByNew] = useState(false);
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+  const [customProjects, setCustomProjects] = useState<Project[]>([]);
+  const [showSubmit, setShowSubmit] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
+  const [form, setForm] = useState({
+    name: '',
+    url: '',
+    description: '',
+    category: 'tool',
+    tags: '',
+    lookingForTesters: true,
+    incentive: '',
+    contact: '',
+    tasks: '',
+    startsAt: '',
+    endsAt: '',
+  });
 
-  const filteredProjects = projects.filter((project) => {
+  const allProjects = [...projects, ...customProjects];
+
+  const filteredProjects = allProjects.filter((project) => {
     const matchesCategory = selectedCategory === 'all'
       ? true
       : selectedCategory === 'needs-testers'
@@ -313,8 +331,58 @@ export function Explore() {
     return bDate - aDate;
   });
 
-  const featuredProjects = projects.filter(p => p.featured);
-  const testerProjects = projects.filter(p => p.lookingForTesters);
+  const featuredProjects = allProjects.filter(p => p.featured);
+  const testerProjects = allProjects.filter(p => p.lookingForTesters);
+
+  const handleSubmitProject = () => {
+    if (!form.name.trim() || !form.url.trim() || !form.description.trim()) {
+      setFormError('Name, URL, and description are required');
+      return;
+    }
+
+    const tags = form.tags
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+
+    const tasks = form.tasks
+      .split(/[,\n]/)
+      .map((t) => t.trim())
+      .filter(Boolean);
+
+    const newProject: Project = {
+      id: `custom-${Date.now()}`,
+      name: form.name.trim(),
+      url: form.url.trim(),
+      description: form.description.trim(),
+      category: form.category as Project['category'],
+      tags: tags.length ? tags : ['Community'],
+      featured: false,
+      lookingForTesters: form.lookingForTesters,
+      incentive: form.incentive || undefined,
+      startsAt: form.startsAt || undefined,
+      endsAt: form.endsAt || undefined,
+      tasks: tasks.length ? tasks : undefined,
+      contact: form.contact || undefined,
+    };
+
+    setCustomProjects((prev) => [newProject, ...prev]);
+    setForm({
+      name: '',
+      url: '',
+      description: '',
+      category: 'tool',
+      tags: '',
+      lookingForTesters: true,
+      incentive: '',
+      contact: '',
+      tasks: '',
+      startsAt: '',
+      endsAt: '',
+    });
+    setFormError(null);
+    setShowSubmit(false);
+  };
 
   return (
     <div className="space-y-6 pb-20 lg:pb-0">
@@ -449,12 +517,12 @@ export function Explore() {
           <div className="flex-1 text-center md:text-left">
             <h3 className="font-semibold text-white mb-1">Have a project to showcase?</h3>
             <p className="text-sm text-zinc-400">
-              Submit your Solana devnet project to be featured in our explorer.
+              Submit your Solana devnet project to be featured and find testers.
             </p>
           </div>
           <Button
             variant="primary"
-            onClick={() => window.open('https://github.com/ap42213/fakesol/issues/new', '_blank')}
+            onClick={() => setShowSubmit(true)}
             icon={Icons.external}
           >
             Submit Project
@@ -479,6 +547,146 @@ export function Explore() {
           </div>
         </div>
       </Card>
+
+      {showSubmit && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <Card variant="glass" padding="lg" className="max-w-3xl w-full relative">
+            <button
+              className="absolute top-4 right-4 text-zinc-500 hover:text-white"
+              onClick={() => setShowSubmit(false)}
+              aria-label="Close"
+            >
+              ✕
+            </button>
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-zinc-400">Submit a project</p>
+                <h2 className="text-xl font-semibold text-white">List your devnet project for testers</h2>
+              </div>
+
+              {formError && (
+                <div className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 px-3 py-2 rounded-lg">{formError}</div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-300">Project name *</label>
+                  <input
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-300">URL *</label>
+                  <input
+                    value={form.url}
+                    onChange={(e) => setForm({ ...form, url: e.target.value })}
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white"
+                    placeholder="https://..."
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-300">Category</label>
+                  <select
+                    value={form.category}
+                    onChange={(e) => setForm({ ...form, category: e.target.value })}
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white"
+                  >
+                    <option value="tool">Tool</option>
+                    <option value="defi">DeFi</option>
+                    <option value="nft">NFT</option>
+                    <option value="dao">DAO</option>
+                    <option value="game">Game</option>
+                  </select>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-300">Tags (comma separated)</label>
+                  <input
+                    value={form.tags}
+                    onChange={(e) => setForm({ ...form, tags: e.target.value })}
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white"
+                    placeholder="dex, devnet, beta"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm text-zinc-300">Description *</label>
+                <textarea
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white h-24"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-300">Incentive (optional)</label>
+                  <input
+                    value={form.incentive}
+                    onChange={(e) => setForm({ ...form, incentive: e.target.value })}
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white"
+                    placeholder="Raffle, WL, bounty"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-300">Contact (optional)</label>
+                  <input
+                    value={form.contact}
+                    onChange={(e) => setForm({ ...form, contact: e.target.value })}
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white"
+                    placeholder="Discord/Telegram/Email"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-300">Starts (optional)</label>
+                  <input
+                    type="date"
+                    value={form.startsAt}
+                    onChange={(e) => setForm({ ...form, startsAt: e.target.value })}
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <label className="text-sm text-zinc-300">Ends (optional)</label>
+                  <input
+                    type="date"
+                    value={form.endsAt}
+                    onChange={(e) => setForm({ ...form, endsAt: e.target.value })}
+                    className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm text-zinc-300">Tester tasks (comma or new-line separated)</label>
+                <textarea
+                  value={form.tasks}
+                  onChange={(e) => setForm({ ...form, tasks: e.target.value })}
+                  className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-white h-24"
+                  placeholder="Swap token on devnet\nSubmit feedback form"
+                />
+              </div>
+
+              <label className="flex items-center gap-2 text-sm text-zinc-300">
+                <input
+                  type="checkbox"
+                  checked={form.lookingForTesters}
+                  onChange={(e) => setForm({ ...form, lookingForTesters: e.target.checked })}
+                  className="accent-purple-500"
+                />
+                Actively looking for testers
+              </label>
+
+              <div className="flex justify-end gap-2">
+                <Button variant="ghost" onClick={() => setShowSubmit(false)}>Cancel</Button>
+                <Button variant="primary" onClick={handleSubmitProject}>Submit</Button>
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
 
       {selectedProject && (
         <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center p-4">
