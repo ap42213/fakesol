@@ -46,9 +46,11 @@ export const getClusterInfo = async () => {
   const version = await conn.getVersion();
   const slot = await conn.getSlot();
   const blockHeight = await conn.getBlockHeight();
+  // Derive the RPC URL from the connection; fallback to first configured
+  const rpcUrl = (conn as any)?._rpcEndpoint || RPC_URLS[0];
   
   return {
-    rpcUrl: RPC_URL,
+    rpcUrl,
     version: version['solana-core'],
     slot,
     blockHeight,
