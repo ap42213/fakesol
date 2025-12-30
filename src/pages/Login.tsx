@@ -13,7 +13,7 @@ export function Login() {
   
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [oauthProviders, setOauthProviders] = useState<{ google: boolean; github: boolean }>({ google: false, github: false });
+  const [oauthProviders, setOauthProviders] = useState<{ google: boolean; github: boolean }>({ google: true, github: true });
 
   useEffect(() => {
     // Check available OAuth providers

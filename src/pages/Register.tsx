@@ -15,7 +15,7 @@ export function Register() {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [walletName, setWalletName] = useState('');
-  const [oauthProviders, setOauthProviders] = useState<{ google: boolean; github: boolean }>({ google: false, github: false });
+  const [oauthProviders, setOauthProviders] = useState<{ google: boolean; github: boolean }>({ google: true, github: true });
 
   useEffect(() => {
     // Check available OAuth providers
