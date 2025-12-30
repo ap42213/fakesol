@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { FiDownload, FiChrome, FiCheck, FiCopy, FiExternalLink } from 'react-icons/fi';
+import { FiDownload, FiChrome, FiCheck, FiCopy } from 'react-icons/fi';
 import { useAuthStore } from '../store/authStore';
 import { useWalletStore } from '../store/walletStore';
 
