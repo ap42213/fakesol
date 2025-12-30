@@ -9,13 +9,13 @@ import {
 } from '@solana/web3.js';
 import bs58 from 'bs58';
 
-// Support multiple RPC endpoints for better airdrop reliability
-// QuickNode recommended for better performance and airdrop success rate
+// Use QuickNode or configured RPC endpoints
+// QuickNode has better rate limits than public Solana RPC
 const RPC_ENDPOINTS = (import.meta.env.VITE_SOLANA_RPC_URLS as string | undefined)?.
   split(',')
   .map((url) => url.trim())
   .filter(Boolean) || [
-    'https://api.devnet.solana.com', // fallback
+    'https://api.devnet.solana.com', // fallback only
   ];
 
 let rpcIndex = 0;
@@ -56,19 +56,23 @@ export const getBalance = async (publicKey: PublicKey): Promise<number> => {
 };
 
 // Request airdrop (devnet faucet)
+// Tries multiple RPC endpoints to work around rate limits
 export const requestAirdrop = async (
   publicKey: PublicKey,
   amount: number = 1
 ): Promise<string> => {
-  const maxRetries = 3;
+  const cappedAmount = Math.min(amount, 5);
+  const maxRetries = RPC_ENDPOINTS.length * 2; // Try each endpoint twice
   let lastError: unknown;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
-    const connection = getConnection();
+    const endpoint = RPC_ENDPOINTS[attempt % RPC_ENDPOINTS.length];
+    const connection = new Connection(endpoint, 'confirmed');
+    
     try {
       const signature = await connection.requestAirdrop(
         publicKey,
-        amount * LAMPORTS_PER_SOL
+        cappedAmount * LAMPORTS_PER_SOL
       );
 
       const latestBlockhash = await connection.getLatestBlockhash('confirmed');
@@ -83,12 +87,28 @@ export const requestAirdrop = async (
       );
 
       return signature;
-    } catch (err) {
+    } catch (err: any) {
       lastError = err;
+      const isRateLimited = err?.message?.includes('429') || 
+                           err?.message?.toLowerCase().includes('rate') ||
+                           err?.message?.toLowerCase().includes('limit');
+      
+      // If rate limited, immediately try next endpoint
+      if (isRateLimited) {
+        continue;
+      }
+      
+      // For other errors, wait before retry
       await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
     }
   }
 
+  // Provide helpful error message
+  const errorMsg = lastError instanceof Error ? lastError.message : 'Airdrop failed';
+  if (errorMsg.includes('429') || errorMsg.toLowerCase().includes('rate')) {
+    throw new Error('Rate limited. Please try again in a few minutes or use https://faucet.solana.com');
+  }
+  
   throw lastError instanceof Error
     ? lastError
     : new Error('Airdrop failed after retries');

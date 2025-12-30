@@ -19,6 +19,12 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 const isProduction = process.env.NODE_ENV === 'production';
 
+// Trust proxy in production (Railway, Vercel, etc.)
+// This ensures rate limiting uses the real client IP, not the proxy IP
+if (isProduction) {
+  app.set('trust proxy', 1);
+}
+
 // Middleware
 app.use(cors({
   origin: isProduction 

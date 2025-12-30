@@ -35,7 +35,8 @@ export function Dashboard() {
     refreshBalance, 
     requestAirdrop,
     fetchTransactions,
-    clearError 
+    clearError,
+    getAirdropCooldown,
   } = useWalletStore();
   
   const { showToast } = useToast();
@@ -44,6 +45,7 @@ export function Dashboard() {
   const [clusterInfo, setClusterInfo] = useState<{ rpcUrl: string; slot: number; blockHeight: number; version: string } | null>(null);
   const [latencyMs, setLatencyMs] = useState<number | null>(null);
   const [devToolsError, setDevToolsError] = useState<string | null>(null);
+  const [cooldownTimer, setCooldownTimer] = useState<string | null>(null);
 
   useEffect(() => {
     refreshBalance();
@@ -51,6 +53,24 @@ export function Dashboard() {
     const interval = setInterval(refreshBalance, 30000);
     return () => clearInterval(interval);
   }, [refreshBalance, fetchTransactions]);
+
+  // Update cooldown timer every second
+  useEffect(() => {
+    const updateCooldown = () => {
+      const { canAirdrop, timeRemaining } = getAirdropCooldown();
+      if (!canAirdrop && timeRemaining > 0) {
+        const hours = Math.floor(timeRemaining / (60 * 60 * 1000));
+        const minutes = Math.floor((timeRemaining % (60 * 60 * 1000)) / (60 * 1000));
+        setCooldownTimer(`${hours}h ${minutes}m`);
+      } else {
+        setCooldownTimer(null);
+      }
+    };
+    
+    updateCooldown();
+    const interval = setInterval(updateCooldown, 60000); // Update every minute
+    return () => clearInterval(interval);
+  }, [getAirdropCooldown]);
 
   useEffect(() => {
     const loadCluster = async () => {
@@ -142,16 +162,32 @@ export function Dashboard() {
             </p>
           </div>
           
-          <div className="flex gap-3">
+          <div className="flex flex-col items-end gap-2">
             <Button
               variant="success"
               size="lg"
               onClick={handleAirdrop}
               loading={airdropLoading}
+              disabled={!!cooldownTimer}
               icon={Icons.droplet}
             >
-              Airdrop
+              {cooldownTimer ? `Wait ${cooldownTimer}` : 'Airdrop'}
             </Button>
+            {cooldownTimer && (
+              <a 
+                href="https://faucet.solana.com" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-xs text-purple-400 hover:text-purple-300 underline"
+              >
+                Use Solana Faucet instead →
+              </a>
+            )}
+            {!cooldownTimer && (
+              <p className="text-xs text-zinc-500">
+                {getAirdropCooldown().count}/2 airdrops used
+              </p>
+            )}
           </div>
         </div>
       </Card>

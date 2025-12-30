@@ -37,6 +37,9 @@ interface WalletState {
   balance: number;
   transactions: Transaction[];
   
+  // Airdrop tracking (per wallet public key)
+  airdropHistory: Record<string, { lastAirdrop: number; count: number }>;
+  
   // UI state
   isLoading: boolean;
   error: string | null;
@@ -57,6 +60,9 @@ interface WalletState {
   sendTransaction: (to: string, amount: number) => Promise<string>;
   fetchTransactions: () => Promise<void>;
   clearError: () => void;
+  
+  // Airdrop helpers
+  getAirdropCooldown: () => { canAirdrop: boolean; timeRemaining: number; count: number };
 }
 
 const generateId = () => Math.random().toString(36).substring(2, 15);
@@ -71,6 +77,7 @@ export const useWalletStore = create<WalletState>()(
       publicKey: null,
       balance: 0,
       transactions: [],
+      airdropHistory: {},
       isLoading: false,
       error: null,
 
@@ -231,18 +238,45 @@ export const useWalletStore = create<WalletState>()(
       },
 
       requestAirdrop: async (amount = 1) => {
-        const { keypair } = get();
-        if (!keypair) throw new Error('No wallet connected');
+        const { keypair, publicKey, airdropHistory } = get();
+        if (!keypair || !publicKey) throw new Error('No wallet connected');
+
+        // Check cooldown before attempting
+        const COOLDOWN_MS = 8 * 60 * 60 * 1000; // 8 hours
+        const MAX_AIRDROPS = 2;
+        const history = airdropHistory[publicKey] || { lastAirdrop: 0, count: 0 };
+        const timeSinceLast = Date.now() - history.lastAirdrop;
+        
+        // Reset count if cooldown has passed
+        const currentCount = timeSinceLast >= COOLDOWN_MS ? 0 : history.count;
+        
+        if (currentCount >= MAX_AIRDROPS && timeSinceLast < COOLDOWN_MS) {
+          const hoursRemaining = Math.ceil((COOLDOWN_MS - timeSinceLast) / (60 * 60 * 1000));
+          throw new Error(`Rate limited. Try again in ~${hoursRemaining} hours or use faucet.solana.com`);
+        }
 
         set({ isLoading: true, error: null });
         try {
           const signature = await requestAirdrop(keypair.publicKey, amount);
+          
+          // Update airdrop history on success
+          const newCount = currentCount + 1;
+          set({
+            airdropHistory: {
+              ...get().airdropHistory,
+              [publicKey]: {
+                lastAirdrop: Date.now(),
+                count: newCount,
+              },
+            },
+          });
+          
           await get().refreshBalance();
           return signature;
         } catch (err: any) {
-          const errorMsg = err.message?.includes('429') 
-            ? 'Rate limited. Please wait a moment and try again.'
-            : 'Airdrop failed. Try again later.';
+          const errorMsg = err.message?.includes('429') || err.message?.toLowerCase().includes('rate')
+            ? 'Rate limited by Solana. Use faucet.solana.com or wait 8 hours.'
+            : err.message || 'Airdrop failed. Try again later.';
           set({ error: errorMsg, isLoading: false });
           throw new Error(errorMsg);
         }
@@ -286,12 +320,34 @@ export const useWalletStore = create<WalletState>()(
       },
 
       clearError: () => set({ error: null }),
+
+      getAirdropCooldown: () => {
+        const { publicKey, airdropHistory } = get();
+        if (!publicKey) return { canAirdrop: false, timeRemaining: 0, count: 0 };
+        
+        const COOLDOWN_MS = 8 * 60 * 60 * 1000; // 8 hours
+        const MAX_AIRDROPS = 2;
+        const history = airdropHistory[publicKey] || { lastAirdrop: 0, count: 0 };
+        const timeSinceLast = Date.now() - history.lastAirdrop;
+        
+        // Reset count if cooldown has passed
+        if (timeSinceLast >= COOLDOWN_MS) {
+          return { canAirdrop: true, timeRemaining: 0, count: 0 };
+        }
+        
+        const currentCount = history.count;
+        const canAirdrop = currentCount < MAX_AIRDROPS;
+        const timeRemaining = canAirdrop ? 0 : COOLDOWN_MS - timeSinceLast;
+        
+        return { canAirdrop, timeRemaining, count: currentCount };
+      },
     }),
     {
       name: 'fakesol-wallets',
       partialize: (state) => ({
         wallets: state.wallets,
         activeWalletId: state.activeWalletId,
+        airdropHistory: state.airdropHistory,
       }),
       onRehydrateStorage: () => (state, error) => {
         if (error || !state) return;
