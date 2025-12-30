@@ -128,6 +128,16 @@ export const api = {
         symbol: string;
       }>;
     }>(`/wallet/${address}/tokens`),
+
+  // Cluster info for dev tools
+  getClusterInfo: () =>
+    apiRequest<{
+      status: string;
+      rpcUrl: string;
+      version: string;
+      slot: number;
+      blockHeight: number;
+    }>(`/cluster`),
 };
 
 export default api;

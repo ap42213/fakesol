@@ -61,6 +61,22 @@ function TokenItem({ token }: { token: Token }) {
         </p>
         <p className="text-xs text-zinc-500">{token.symbol}</p>
       </div>
+      <div className="flex flex-col gap-2 text-right">
+        <button
+          className="text-xs text-purple-400 hover:text-purple-300"
+          onClick={() => navigator.clipboard.writeText(token.mint)}
+        >
+          Copy mint
+        </button>
+        <a
+          href={`https://explorer.solana.com/address/${token.mint}?cluster=devnet`}
+          target="_blank"
+          rel="noreferrer"
+          className="text-xs text-zinc-400 hover:text-white"
+        >
+          Explorer
+        </a>
+      </div>
     </div>
   );
 }
@@ -68,6 +84,7 @@ function TokenItem({ token }: { token: Token }) {
 export function Tokens() {
   const { publicKey } = useWalletStore();
   const [tokens, setTokens] = useState<Token[]>([]);
+  const [hideZero, setHideZero] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -95,6 +112,8 @@ export function Tokens() {
   useEffect(() => {
     fetchTokens();
   }, [publicKey]);
+
+  const filteredTokens = hideZero ? tokens.filter((t) => t.uiAmount > 0) : tokens;
 
   return (
     <div className="space-y-6 pb-20 lg:pb-0">
@@ -148,8 +167,17 @@ export function Tokens() {
 
       {/* Token List */}
       <Card variant="glass" padding="none">
-        <div className="p-4 border-b border-zinc-800">
+        <div className="p-4 border-b border-zinc-800 flex items-center justify-between">
           <h3 className="font-medium text-white">Your Tokens</h3>
+          <label className="flex items-center gap-2 text-xs text-zinc-400">
+            <input
+              type="checkbox"
+              className="accent-purple-500"
+              checked={hideZero}
+              onChange={(e) => setHideZero(e.target.checked)}
+            />
+            Hide zero balances
+          </label>
         </div>
         
         <div className="p-4 space-y-3">
@@ -159,7 +187,7 @@ export function Tokens() {
               <TokenSkeleton />
               <TokenSkeleton />
             </>
-          ) : tokens.length === 0 ? (
+          ) : filteredTokens.length === 0 ? (
             <div className="text-center py-12">
               <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-zinc-800/50 flex items-center justify-center">
                 <svg className="w-8 h-8 text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -172,7 +200,7 @@ export function Tokens() {
               </p>
             </div>
           ) : (
-            tokens.map((token) => (
+            filteredTokens.map((token) => (
               <TokenItem key={token.address} token={token} />
             ))
           )}

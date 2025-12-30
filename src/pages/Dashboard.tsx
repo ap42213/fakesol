@@ -6,6 +6,7 @@ import { Card } from '../components/ui/Card';
 import { Icons, Badge, CopyButton, useToast } from '../components/ui/index';
 import { shortenAddress } from '../lib/solana';
 import { Logo } from '../components/Logo';
+import { api } from '../lib/api';
 
 export function Dashboard() {
   const { 
@@ -23,6 +24,9 @@ export function Dashboard() {
   const { showToast } = useToast();
   const [airdropLoading, setAirdropLoading] = useState(false);
   const [copiedSig, setCopiedSig] = useState<string | null>(null);
+  const [clusterInfo, setClusterInfo] = useState<{ rpcUrl: string; slot: number; blockHeight: number; version: string } | null>(null);
+  const [latencyMs, setLatencyMs] = useState<number | null>(null);
+  const [devToolsError, setDevToolsError] = useState<string | null>(null);
 
   useEffect(() => {
     refreshBalance();
@@ -30,6 +34,30 @@ export function Dashboard() {
     const interval = setInterval(refreshBalance, 30000);
     return () => clearInterval(interval);
   }, [refreshBalance, fetchTransactions]);
+
+  useEffect(() => {
+    const loadCluster = async () => {
+      try {
+        const start = performance.now();
+        const res = await api.getClusterInfo();
+        const end = performance.now();
+        if (res.error || !res.data) {
+          setDevToolsError(res.error || res.message || 'Failed to load');
+          return;
+        }
+        setLatencyMs(Math.round(end - start));
+        setClusterInfo({
+          rpcUrl: res.data.rpcUrl,
+          slot: res.data.slot,
+          blockHeight: res.data.blockHeight,
+          version: res.data.version,
+        });
+      } catch (e: any) {
+        setDevToolsError(e.message || 'Failed to load');
+      }
+    };
+    loadCluster();
+  }, []);
 
   const handleAirdrop = async () => {
     setAirdropLoading(true);
@@ -265,6 +293,46 @@ export function Dashboard() {
               SOL on devnet has no real value and can be obtained freely via airdrops.
             </p>
           </div>
+        </div>
+      </Card>
+
+      {/* Dev Tools */}
+      <Card variant="glass" padding="md">
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3">
+            <div className="p-2 bg-purple-500/10 rounded-xl text-purple-400 flex-shrink-0">
+              {Icons.settings}
+            </div>
+            <div>
+              <p className="text-sm text-zinc-300 font-medium">Dev Tools</p>
+              {devToolsError ? (
+                <p className="text-sm text-red-400 mt-1">{devToolsError}</p>
+              ) : clusterInfo ? (
+                <div className="space-y-1 text-sm text-zinc-400 mt-1">
+                  <p>RPC: <span className="text-white font-mono break-all">{clusterInfo.rpcUrl}</span></p>
+                  <p>Slot: <span className="text-white">{clusterInfo.slot}</span> · Block: <span className="text-white">{clusterInfo.blockHeight}</span></p>
+                  <p>Version: <span className="text-white">{clusterInfo.version}</span></p>
+                  {latencyMs !== null && <p>Latency: <span className="text-white">~{latencyMs} ms</span></p>}
+                </div>
+              ) : (
+                <p className="text-sm text-zinc-500 mt-1">Loading cluster info…</p>
+              )}
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              const key = useWalletStore.getState().exportKey?.();
+              if (!key) return;
+              const confirmed = window.confirm('Export private key? Only for devnet testing.');
+              if (!confirmed) return;
+              navigator.clipboard.writeText(key);
+              showToast('Private key copied', 'success');
+            }}
+          >
+            Copy Dev Key
+          </Button>
         </div>
       </Card>
     </div>
