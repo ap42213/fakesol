@@ -147,6 +147,21 @@ export function Sidebar() {
              </button>
              <p className="text-[10px] text-zinc-600 mt-1 italic">⚠️ Do not send real SOL</p>
            </div>
+
+           <div>
+             <p className="text-xs text-zinc-500 mb-1">Buy <a href="https://x.com/hardhatroq" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">@hardhatroq</a> a coffee ☕️:</p>
+             <button 
+               onClick={() => {
+                 navigator.clipboard.writeText('FfD6D7PqWxPgJyDG4wcwGkzubqUg6wDE8jhfjJxC7MQv');
+               }}
+               className="w-full flex items-center justify-between p-2 bg-zinc-800/50 hover:bg-zinc-800 rounded-lg group transition-colors text-left"
+               title="Copy Donation Address"
+             >
+                <span className="text-xs text-zinc-400 font-mono truncate">FfD6...MQv</span>
+                <FiCopy className="w-3 h-3 text-zinc-500 group-hover:text-white transition-colors" />
+             </button>
+             <p className="text-[10px] text-zinc-600 mt-1 italic">Real SOL (Mainnet)</p>
+           </div>
         </div>
 
         {/* Network Status */}

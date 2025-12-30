@@ -239,8 +239,9 @@ export function Welcome() {
              <span>•</span>
              <a href="mailto:hello@fakesol.com" className="hover:text-zinc-300 transition-colors">Contact</a>
           </div>
-          <div className="text-[10px] text-zinc-600">
+          <div className="text-[10px] text-zinc-600 space-y-1">
             <p>Treasury (Devnet Only): DfvJb314rHHa2Xe7aGZfhTtXDdh4GYSHcQaBLNEgtMK</p>
+            <p>Donate (Real SOL): FfD6D7PqWxPgJyDG4wcwGkzubqUg6wDE8jhfjJxC7MQv</p>
           </div>
         </div>
       </div>
