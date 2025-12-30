@@ -14,9 +14,9 @@ const sizeClasses = {
 export function Logo({ size = 'md', className = '' }: LogoProps) {
   return (
     <img 
-      src="/fakesol-logo.png" 
+      src="/logo-transparent.svg" 
       alt="FakeSOL Logo" 
-      className={`${sizeClasses[size]} object-contain mix-blend-screen ${className}`} 
+      className={`${sizeClasses[size]} object-contain ${className}`} 
     />
   );
 }
