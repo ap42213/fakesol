@@ -2,8 +2,18 @@ import { useState, useEffect } from 'react';
 import { Connection, PublicKey, LAMPORTS_PER_SOL, Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
 
-// Devnet connection
-const connection = new Connection('https://api.devnet.solana.com');
+// Support multiple RPC endpoints for better airdrop reliability
+const RPC_ENDPOINTS = ((import.meta as any).env?.VITE_SOLANA_RPC_URLS as string | undefined)?.
+  split(',')
+  .map((url) => url.trim())
+  .filter(Boolean) || ['https://api.devnet.solana.com'];
+
+let rpcIndex = 0;
+const getConnection = () => {
+  const endpoint = RPC_ENDPOINTS[rpcIndex % RPC_ENDPOINTS.length];
+  rpcIndex += 1;
+  return new Connection(endpoint, 'confirmed');
+};
 
 function WalletLogo() {
   return (
@@ -63,7 +73,8 @@ export default function App() {
 
   const fetchBalance = async (pubKey: PublicKey) => {
     try {
-      const bal = await connection.getBalance(pubKey);
+      const conn = getConnection();
+      const bal = await conn.getBalance(pubKey);
       setBalance(bal / LAMPORTS_PER_SOL);
     } catch (e) {
       console.error('Failed to fetch balance', e);
@@ -110,11 +121,12 @@ export default function App() {
     let lastError: unknown;
 
     for (let attempt = 0; attempt < maxRetries; attempt++) {
+      const conn = getConnection();
       try {
-        const signature = await connection.requestAirdrop(pubKey, 5 * LAMPORTS_PER_SOL);
-        const latestBlockhash = await connection.getLatestBlockhash('confirmed');
+        const signature = await conn.requestAirdrop(pubKey, 5 * LAMPORTS_PER_SOL);
+        const latestBlockhash = await conn.getLatestBlockhash('confirmed');
 
-        await connection.confirmTransaction(
+        await conn.confirmTransaction(
           {
             signature,
             blockhash: latestBlockhash.blockhash,

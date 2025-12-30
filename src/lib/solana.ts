@@ -9,12 +9,24 @@ import {
 } from '@solana/web3.js';
 import bs58 from 'bs58';
 
-// Devnet RPC endpoint
-export const DEVNET_RPC_URL = 'https://api.devnet.solana.com';
+// Support multiple RPC endpoints for better airdrop reliability
+const RPC_ENDPOINTS = (import.meta.env.VITE_SOLANA_RPC_URLS as string | undefined)?.
+  split(',')
+  .map((url) => url.trim())
+  .filter(Boolean) || ['https://api.devnet.solana.com'];
 
-// Create a connection to Solana devnet
-export const getConnection = (): Connection => {
-  return new Connection(DEVNET_RPC_URL, 'confirmed');
+let rpcIndex = 0;
+
+export const getRpcEndpoint = () => {
+  const endpoint = RPC_ENDPOINTS[rpcIndex % RPC_ENDPOINTS.length];
+  rpcIndex += 1;
+  return endpoint;
+};
+
+// Create a connection to Solana devnet (rotates endpoints)
+export const getConnection = (endpoint?: string): Connection => {
+  const url = endpoint || getRpcEndpoint();
+  return new Connection(url, 'confirmed');
 };
 
 // Generate a new keypair (wallet)
@@ -45,20 +57,17 @@ export const requestAirdrop = async (
   publicKey: PublicKey,
   amount: number = 1
 ): Promise<string> => {
-  const connection = getConnection();
-
-  // Retry airdrop a few times because devnet faucets are rate-limited
   const maxRetries = 3;
   let lastError: unknown;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const connection = getConnection();
     try {
       const signature = await connection.requestAirdrop(
         publicKey,
         amount * LAMPORTS_PER_SOL
       );
 
-      // Get a fresh blockhash after requesting the airdrop
       const latestBlockhash = await connection.getLatestBlockhash('confirmed');
 
       await connection.confirmTransaction(
@@ -73,7 +82,6 @@ export const requestAirdrop = async (
       return signature;
     } catch (err) {
       lastError = err;
-      // Small backoff to reduce 429 rate limit issues
       await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
     }
   }

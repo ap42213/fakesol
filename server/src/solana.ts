@@ -11,20 +11,33 @@ import {
 import { TOKEN_PROGRAM_ID, AccountLayout } from '@solana/spl-token';
 import bs58 from 'bs58';
 
-// Get RPC URL from environment
-const RPC_URL = process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com';
+// Support multiple RPC URLs (comma-separated) for better airdrop reliability
+const RPC_URLS = (process.env.SOLANA_RPC_URLS || process.env.SOLANA_RPC_URL || 'https://api.devnet.solana.com')
+  .split(',')
+  .map((url) => url.trim())
+  .filter(Boolean);
 
-// Connection instance (singleton)
-let connection: Connection | null = null;
+let rpcIndex = 0;
+const connections = new Map<string, Connection>();
 
-export const getConnection = (): Connection => {
-  if (!connection) {
-    connection = new Connection(RPC_URL, {
-      commitment: 'confirmed',
-      confirmTransactionInitialTimeout: 60000,
-    });
+export const getRpcEndpoint = () => {
+  const endpoint = RPC_URLS[rpcIndex % RPC_URLS.length];
+  rpcIndex += 1;
+  return endpoint;
+};
+
+export const getConnection = (endpoint?: string): Connection => {
+  const url = endpoint || getRpcEndpoint();
+  if (connections.has(url)) {
+    return connections.get(url)!;
   }
-  return connection;
+
+  const conn = new Connection(url, {
+    commitment: 'confirmed',
+    confirmTransactionInitialTimeout: 60000,
+  });
+  connections.set(url, conn);
+  return conn;
 };
 
 // Get cluster info to verify connection
@@ -56,16 +69,16 @@ export const requestAirdrop = async (
   publicKeyStr: string,
   amount: number = 1
 ): Promise<{ signature: string; amount: number }> => {
-  const conn = getConnection();
   const publicKey = new PublicKey(publicKeyStr);
-  
-  // Devnet currently allows up to 5 SOL; enforce cap defensively
   const cappedAmount = Math.min(amount, 5);
 
-  const maxRetries = 3;
+  const maxRetries = 4;
   let lastError: any;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
+    const endpoint = getRpcEndpoint();
+    const conn = getConnection(endpoint);
+
     try {
       const signature = await conn.requestAirdrop(
         publicKey,
@@ -82,12 +95,12 @@ export const requestAirdrop = async (
       return { signature, amount: cappedAmount };
     } catch (error: any) {
       lastError = error;
-      if (error.message?.includes('429')) {
-        // Backoff on rate limits
-        await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
-        continue;
+      const isRateLimited = error.message?.includes('429') || error.message?.toLowerCase().includes('rate limit');
+      // Rotate endpoint and back off before retrying
+      await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+      if (!isRateLimited && attempt === maxRetries - 1) {
+        throw error;
       }
-      throw error;
     }
   }
 
