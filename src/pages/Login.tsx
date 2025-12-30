@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { FiMail, FiLock, FiAlertCircle, FiUser } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
-import { LogoWithText } from '../components/Logo';
+import { Logo } from '../components/Logo';
 
 const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
 
@@ -40,10 +40,11 @@ export function Login() {
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center mb-4">
-            <LogoWithText size="xl" />
+          <div className="inline-flex items-center justify-center mb-6">
+            <Logo size="xl" className="shadow-2xl shadow-purple-500/30" />
           </div>
-          <h1 className="text-2xl font-bold gradient-text">Welcome Back</h1>
+          <h1 className="text-4xl font-extrabold text-white mb-2">FakeSOL</h1>
+          <p className="text-zinc-400 text-lg">Welcome Back</p>
           <p className="text-text-muted mt-2">Sign in to access your wallets</p>
         </div>
 
