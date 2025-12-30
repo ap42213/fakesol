@@ -1,0 +1,23 @@
+FROM node:20-slim
+
+# Install OpenSSL for Prisma
+RUN apt-get update -y && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app/server
+
+# Install server dependencies
+COPY server/package*.json ./
+RUN npm install
+
+# Copy prisma schema and generate client
+COPY server/prisma ./prisma
+RUN npx prisma generate
+
+# Copy server source
+COPY server/ ./
+
+# Provide compatible alias for paths
+RUN ln -s . server
+
+# Run reclaim script
+CMD ["npx", "tsx", "scripts/reclaimInactive.ts"]
