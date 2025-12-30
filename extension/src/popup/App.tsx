@@ -104,16 +104,36 @@ export default function App() {
 
   const handleAirdrop = async () => {
     setAirdropping(true);
-    try {
-      const pubKey = new PublicKey(publicKey);
-      const signature = await connection.requestAirdrop(pubKey, 5 * LAMPORTS_PER_SOL);
-      await connection.confirmTransaction(signature);
-      await fetchBalance(pubKey);
-    } catch (e) {
-      console.error('Airdrop failed', e);
-    } finally {
-      setAirdropping(false);
+    const pubKey = new PublicKey(publicKey);
+
+    const maxRetries = 3;
+    let lastError: unknown;
+
+    for (let attempt = 0; attempt < maxRetries; attempt++) {
+      try {
+        const signature = await connection.requestAirdrop(pubKey, 5 * LAMPORTS_PER_SOL);
+        const latestBlockhash = await connection.getLatestBlockhash('confirmed');
+
+        await connection.confirmTransaction(
+          {
+            signature,
+            blockhash: latestBlockhash.blockhash,
+            lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+          },
+          'finalized'
+        );
+
+        await fetchBalance(pubKey);
+        setAirdropping(false);
+        return;
+      } catch (e) {
+        lastError = e;
+        await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+      }
     }
+
+    console.error('Airdrop failed', lastError);
+    setAirdropping(false);
   };
 
   const handleLogout = async () => {

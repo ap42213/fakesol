@@ -46,26 +46,41 @@ export const requestAirdrop = async (
   amount: number = 1
 ): Promise<string> => {
   const connection = getConnection();
-  
-  // Get the latest blockhash BEFORE requesting the airdrop
-  const latestBlockhash = await connection.getLatestBlockhash('confirmed');
-  
-  const signature = await connection.requestAirdrop(
-    publicKey,
-    amount * LAMPORTS_PER_SOL
-  );
-  
-  // Confirm the transaction with the blockhash
-  await connection.confirmTransaction(
-    {
-      signature,
-      blockhash: latestBlockhash.blockhash,
-      lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-    },
-    'confirmed'
-  );
-  
-  return signature;
+
+  // Retry airdrop a few times because devnet faucets are rate-limited
+  const maxRetries = 3;
+  let lastError: unknown;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const signature = await connection.requestAirdrop(
+        publicKey,
+        amount * LAMPORTS_PER_SOL
+      );
+
+      // Get a fresh blockhash after requesting the airdrop
+      const latestBlockhash = await connection.getLatestBlockhash('confirmed');
+
+      await connection.confirmTransaction(
+        {
+          signature,
+          blockhash: latestBlockhash.blockhash,
+          lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+        },
+        'finalized'
+      );
+
+      return signature;
+    } catch (err) {
+      lastError = err;
+      // Small backoff to reduce 429 rate limit issues
+      await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+    }
+  }
+
+  throw lastError instanceof Error
+    ? lastError
+    : new Error('Airdrop failed after retries');
 };
 
 // Send SOL to another address

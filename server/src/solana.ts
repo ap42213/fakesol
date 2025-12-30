@@ -59,30 +59,42 @@ export const requestAirdrop = async (
   const conn = getConnection();
   const publicKey = new PublicKey(publicKeyStr);
   
-  // Cap airdrop at 2 SOL per request (devnet limit)
-  const cappedAmount = Math.min(amount, 2);
-  
-  try {
-    const signature = await conn.requestAirdrop(
-      publicKey,
-      cappedAmount * LAMPORTS_PER_SOL
-    );
-    
-    // Wait for confirmation
-    const latestBlockhash = await conn.getLatestBlockhash();
-    await conn.confirmTransaction({
-      signature,
-      blockhash: latestBlockhash.blockhash,
-      lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
-    });
-    
-    return { signature, amount: cappedAmount };
-  } catch (error: any) {
-    if (error.message?.includes('429')) {
-      throw new Error('RATE_LIMITED');
+  // Devnet currently allows up to 5 SOL; enforce cap defensively
+  const cappedAmount = Math.min(amount, 5);
+
+  const maxRetries = 3;
+  let lastError: any;
+
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    try {
+      const signature = await conn.requestAirdrop(
+        publicKey,
+        cappedAmount * LAMPORTS_PER_SOL
+      );
+      
+      const latestBlockhash = await conn.getLatestBlockhash('confirmed');
+      await conn.confirmTransaction({
+        signature,
+        blockhash: latestBlockhash.blockhash,
+        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+      }, 'finalized');
+      
+      return { signature, amount: cappedAmount };
+    } catch (error: any) {
+      lastError = error;
+      if (error.message?.includes('429')) {
+        // Backoff on rate limits
+        await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+        continue;
+      }
+      throw error;
     }
-    throw error;
   }
+
+  if (lastError?.message?.includes('429')) {
+    throw new Error('RATE_LIMITED');
+  }
+  throw lastError || new Error('Airdrop failed after retries');
 };
 
 // Send SOL transaction
