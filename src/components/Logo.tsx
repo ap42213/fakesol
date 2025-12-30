@@ -14,7 +14,7 @@ const sizeClasses = {
 export function Logo({ size = 'md', className = '' }: LogoProps) {
   return (
     <img 
-      src="/fakesol.svg" 
+      src="/fakesol-logo.png" 
       alt="FakeSOL Logo" 
       className={`${sizeClasses[size]} object-contain ${className}`} 
     />
