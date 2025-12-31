@@ -105,7 +105,11 @@ export function Docs() {
             
             <div className="mt-auto pt-4">
               <Link to={tool.path}>
-                <Button variant="secondary" fullWidth className="group-hover:bg-zinc-700 transition-colors">
+                <Button 
+                  variant="outline" 
+                  fullWidth 
+                  className="bg-zinc-900/50 border-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-800 hover:border-zinc-700 transition-all"
+                >
                   Launch Tool
                 </Button>
               </Link>
