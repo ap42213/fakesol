@@ -59,9 +59,37 @@ export const getBalance = async (publicKey: PublicKey): Promise<number> => {
 // Tries multiple RPC endpoints to work around rate limits
 export const requestAirdrop = async (
   publicKey: PublicKey,
-  amount: number = 1
+  amount: number = 1,
+  connection?: Connection
 ): Promise<string> => {
   const cappedAmount = Math.min(amount, 5);
+  
+  // If a specific connection is provided, try it first
+  if (connection) {
+    try {
+      const signature = await connection.requestAirdrop(
+        publicKey,
+        cappedAmount * LAMPORTS_PER_SOL
+      );
+      
+      const latestBlockhash = await connection.getLatestBlockhash('confirmed');
+      
+      await connection.confirmTransaction(
+        {
+          signature,
+          blockhash: latestBlockhash.blockhash,
+          lastValidBlockHeight: latestBlockhash.lastValidBlockHeight,
+        },
+        'finalized'
+      );
+      
+      return signature;
+    } catch (err) {
+      console.warn('Custom connection airdrop failed, falling back to rotation strategy', err);
+      // Fall through to rotation strategy
+    }
+  }
+
   const maxRetries = RPC_ENDPOINTS.length * 2; // Try each endpoint twice
   let lastError: unknown;
 
@@ -118,9 +146,10 @@ export const requestAirdrop = async (
 export const sendSol = async (
   fromKeypair: Keypair,
   toPublicKey: PublicKey,
-  amount: number
+  amount: number,
+  connection?: Connection
 ): Promise<string> => {
-  const connection = getConnection();
+  const conn = connection || getConnection();
   
   const transaction = new Transaction().add(
     SystemProgram.transfer({
@@ -130,7 +159,7 @@ export const sendSol = async (
     })
   );
 
-  const signature = await sendAndConfirmTransaction(connection, transaction, [
+  const signature = await sendAndConfirmTransaction(conn, transaction, [
     fromKeypair,
   ]);
   
@@ -140,10 +169,11 @@ export const sendSol = async (
 // Get recent transactions for a wallet
 export const getTransactions = async (
   publicKey: PublicKey,
-  limit: number = 10
+  limit: number = 10,
+  connection?: Connection
 ) => {
-  const connection = getConnection();
-  const signatures = await connection.getSignaturesForAddress(publicKey, {
+  const conn = connection || getConnection();
+  const signatures = await conn.getSignaturesForAddress(publicKey, {
     limit,
   });
   return signatures;

@@ -1,11 +1,11 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Keypair, PublicKey } from '@solana/web3.js';
+import { Keypair, PublicKey, Connection, LAMPORTS_PER_SOL } from '@solana/web3.js';
 import {
   generateWallet,
   importWallet,
   exportPrivateKey,
-  getBalance,
+  getConnection,
   requestAirdrop,
   sendSol,
   getTransactions,
@@ -44,6 +44,11 @@ interface WalletState {
   isLoading: boolean;
   error: string | null;
   
+  // RPC Configuration
+  connection: Connection;
+  rpcEndpoint: string;
+  setRpcEndpoint: (endpoint: string) => void;
+
   // Multi-wallet actions
   createWallet: (name?: string) => SavedWallet;
   importWalletFromKey: (privateKey: string, name?: string) => void;
@@ -81,6 +86,16 @@ export const useWalletStore = create<WalletState>()(
       airdropHistory: {},
       isLoading: false,
       error: null,
+      
+      connection: getConnection(),
+      rpcEndpoint: 'https://api.devnet.solana.com',
+
+      setRpcEndpoint: (endpoint: string) => {
+        const connection = getConnection(endpoint);
+        set({ rpcEndpoint: endpoint, connection });
+        get().refreshBalance();
+        get().fetchTransactions();
+      },
 
       setWallets: (wallets: SavedWallet[]) => {
         const { activeWalletId } = get();
@@ -263,20 +278,20 @@ export const useWalletStore = create<WalletState>()(
       },
 
       refreshBalance: async () => {
-        const { keypair } = get();
+        const { keypair, connection } = get();
         if (!keypair) return;
 
         set({ isLoading: true });
         try {
-          const balance = await getBalance(keypair.publicKey);
-          set({ balance, isLoading: false });
+          const balance = await connection.getBalance(keypair.publicKey);
+          set({ balance: balance / LAMPORTS_PER_SOL, isLoading: false });
         } catch (err) {
           set({ error: 'Failed to fetch balance', isLoading: false });
         }
       },
 
       requestAirdrop: async (amount = 1) => {
-        const { keypair, publicKey, airdropHistory } = get();
+        const { keypair, publicKey, airdropHistory, connection } = get();
         if (!keypair || !publicKey) throw new Error('No wallet connected');
 
         // Check cooldown before attempting
@@ -295,7 +310,7 @@ export const useWalletStore = create<WalletState>()(
 
         set({ isLoading: true, error: null });
         try {
-          const signature = await requestAirdrop(keypair.publicKey, amount);
+          const signature = await requestAirdrop(keypair.publicKey, amount, connection);
           
           // Update airdrop history on success
           const newCount = currentCount + 1;
@@ -321,13 +336,13 @@ export const useWalletStore = create<WalletState>()(
       },
 
       sendTransaction: async (to: string, amount: number) => {
-        const { keypair } = get();
+        const { keypair, connection } = get();
         if (!keypair) throw new Error('No wallet connected');
 
         set({ isLoading: true, error: null });
         try {
           const toPublicKey = new PublicKey(to);
-          const signature = await sendSol(keypair, toPublicKey, amount);
+          const signature = await sendSol(keypair, toPublicKey, amount, connection);
           await get().refreshBalance();
           await get().fetchTransactions();
           return signature;
@@ -339,11 +354,11 @@ export const useWalletStore = create<WalletState>()(
       },
 
       fetchTransactions: async () => {
-        const { keypair } = get();
+        const { keypair, connection } = get();
         if (!keypair) return;
 
         try {
-          const txs = await getTransactions(keypair.publicKey);
+          const txs = await getTransactions(keypair.publicKey, 10, connection);
           set({ 
             transactions: txs.map(tx => ({
               signature: tx.signature,
@@ -386,9 +401,15 @@ export const useWalletStore = create<WalletState>()(
         wallets: state.wallets,
         activeWalletId: state.activeWalletId,
         airdropHistory: state.airdropHistory,
+        rpcEndpoint: state.rpcEndpoint,
       }),
       onRehydrateStorage: () => (state, error) => {
         if (error || !state) return;
+        
+        // Re-initialize connection from persisted endpoint
+        if (state.rpcEndpoint) {
+          state.connection = getConnection(state.rpcEndpoint);
+        }
         
         if (state.activeWalletId && state.wallets.length > 0) {
           const activeWallet = state.wallets.find(w => w.id === state.activeWalletId);

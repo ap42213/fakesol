@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { useConnection, useWallet } from '@solana/wallet-adapter-react'; // Wait, I'm using a custom store, not wallet-adapter
 import { useWalletStore } from '../store/walletStore';
-import { Connection, Keypair, SystemProgram, Transaction, PublicKey } from '@solana/web3.js';
+import { Keypair, SystemProgram, Transaction, PublicKey } from '@solana/web3.js';
 import { 
   createInitializeMintInstruction, 
   getAssociatedTokenAddress, 
@@ -14,13 +13,13 @@ import {
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
-import { Badge, Icons } from '../components/ui/index';
+import { Badge, useToast } from '../components/ui/index';
 import { SEO } from '../components/SEO';
-import { FiBox, FiCpu, FiImage, FiLayers, FiCheck, FiAlertCircle, FiLoader } from 'react-icons/fi';
-import { toast } from '../components/ui/index';
+import { FiBox, FiCpu, FiLayers, FiCheck, FiAlertCircle, FiLoader } from 'react-icons/fi';
 
 export function TokenCreator() {
-  const { publicKey, signTransaction, connection } = useWalletStore();
+  const { publicKey, keypair, connection } = useWalletStore();
+  const { showToast } = useToast();
   
   const [isLoading, setIsLoading] = useState(false);
   const [step, setStep] = useState<'input' | 'creating' | 'success'>('input');
@@ -39,8 +38,8 @@ export function TokenCreator() {
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!publicKey || !signTransaction) {
-      toast.error('Please connect your wallet first');
+    if (!publicKey || !keypair) {
+      showToast('Please connect your wallet first', 'error');
       return;
     }
 
@@ -117,21 +116,22 @@ export function TokenCreator() {
       );
 
       transaction.feePayer = walletPublicKey;
-      const { blockhash } = await connection.getLatestBlockhash();
+      const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
       transaction.recentBlockhash = blockhash;
 
-      // Partial sign with mint keypair
-      transaction.partialSign(mintKeypair);
-
-      addLog('🔐 Requesting wallet signature...');
-      // Sign with user wallet
-      const signedTx = await signTransaction(transaction);
+      addLog('🔐 Signing transaction...');
+      // Sign with both mint keypair and wallet keypair
+      transaction.sign(mintKeypair, keypair);
 
       addLog('📡 Sending transaction to Devnet...');
-      const signature = await connection.sendRawTransaction(signedTx.serialize());
+      const signature = await connection.sendRawTransaction(transaction.serialize());
       
       addLog('⏳ Confirming transaction...');
-      await connection.confirmTransaction(signature);
+      await connection.confirmTransaction({
+        signature,
+        blockhash,
+        lastValidBlockHeight
+      });
 
       addLog('✅ Token created successfully!');
       setCreatedToken({
@@ -139,12 +139,12 @@ export function TokenCreator() {
         amount: formData.supply
       });
       setStep('success');
-      toast.success('Token created successfully!');
+      showToast('Token created successfully!', 'success');
 
     } catch (error: any) {
       console.error(error);
       addLog(`❌ Error: ${error.message}`);
-      toast.error('Failed to create token');
+      showToast(error.message || 'Failed to create token', 'error');
       setIsLoading(false);
     }
   };

@@ -1,17 +1,25 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useWalletStore } from '../store/walletStore';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
+import { Input } from '../components/ui/Input';
 import { Icons, Badge, Modal, useToast } from '../components/ui/index';
 import { Logo } from '../components/Logo';
 
 export function Settings() {
-  const { publicKey, balance, exportKey, disconnect } = useWalletStore();
+  const { publicKey, balance, exportKey, disconnect, rpcEndpoint, setRpcEndpoint } = useWalletStore();
   const { showToast } = useToast();
   
   const [showPrivateKey, setShowPrivateKey] = useState(false);
   const [privateKey, setPrivateKey] = useState<string | null>(null);
   const [showDisconnectModal, setShowDisconnectModal] = useState(false);
+  
+  const [customRpc, setCustomRpc] = useState(rpcEndpoint);
+  const [isEditingRpc, setIsEditingRpc] = useState(false);
+
+  useEffect(() => {
+    setCustomRpc(rpcEndpoint);
+  }, [rpcEndpoint]);
 
   const handleShowPrivateKey = () => {
     const key = exportKey();
@@ -28,6 +36,26 @@ export function Settings() {
   const handleDisconnect = () => {
     disconnect();
     window.location.href = '/';
+  };
+
+  const handleSaveRpc = () => {
+    if (!customRpc) return;
+    try {
+      new URL(customRpc); // Validate URL
+      setRpcEndpoint(customRpc);
+      setIsEditingRpc(false);
+      showToast('RPC endpoint updated', 'success');
+    } catch (e) {
+      showToast('Invalid URL format', 'error');
+    }
+  };
+
+  const handleResetRpc = () => {
+    const defaultRpc = 'https://api.devnet.solana.com';
+    setRpcEndpoint(defaultRpc);
+    setCustomRpc(defaultRpc);
+    setIsEditingRpc(false);
+    showToast('Reset to default Devnet RPC', 'success');
   };
 
   return (
@@ -55,18 +83,69 @@ export function Settings() {
 
       {/* Network Info */}
       <Card variant="glass" padding="md">
-        <h3 className="text-sm font-medium text-zinc-400 mb-4">Network</h3>
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-medium text-zinc-400">Network Configuration</h3>
+          <Badge variant="success">Active</Badge>
+        </div>
+        
+        <div className="space-y-4">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0">
               <span className="w-3 h-3 bg-purple-500 rounded-full status-dot" />
             </div>
-            <div>
-              <p className="text-white font-medium">Solana Devnet</p>
-              <p className="text-xs text-zinc-500">https://api.devnet.solana.com</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-white font-medium">Solana Network</p>
+              {!isEditingRpc && (
+                <p className="text-xs text-zinc-500 truncate">{rpcEndpoint}</p>
+              )}
             </div>
+            {!isEditingRpc && (
+              <Button 
+                variant="secondary" 
+                size="sm"
+                onClick={() => setIsEditingRpc(true)}
+              >
+                Change
+              </Button>
+            )}
           </div>
-          <Badge variant="success">Active</Badge>
+
+          {isEditingRpc && (
+            <div className="pt-4 border-t border-zinc-800 space-y-3">
+              <Input
+                label="RPC Endpoint URL"
+                value={customRpc}
+                onChange={(e) => setCustomRpc(e.target.value)}
+                placeholder="https://api.devnet.solana.com"
+              />
+              <div className="flex gap-2 justify-end">
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  onClick={() => {
+                    setIsEditingRpc(false);
+                    setCustomRpc(rpcEndpoint);
+                  }}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  variant="secondary" 
+                  size="sm"
+                  onClick={handleResetRpc}
+                >
+                  Reset Default
+                </Button>
+                <Button 
+                  variant="primary" 
+                  size="sm"
+                  onClick={handleSaveRpc}
+                >
+                  Save Changes
+                </Button>
+              </div>
+            </div>
+          )}
         </div>
       </Card>
 

@@ -1,10 +1,10 @@
 import { useState } from 'react';
-import { Connection, Transaction, VersionedTransaction, Message } from '@solana/web3.js';
+import { Transaction, VersionedTransaction } from '@solana/web3.js';
 import { useWalletStore } from '../store/walletStore';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
-import { Badge, Icons } from '../components/ui/index';
+import { Badge } from '../components/ui/index';
 import { SEO } from '../components/SEO';
 import { FiActivity, FiSearch, FiTerminal, FiCheckCircle, FiXCircle, FiCpu } from 'react-icons/fi';
 
@@ -58,15 +58,15 @@ export function TransactionDecoder() {
       // Case 2: Base64 Encoded Transaction (Simulation)
       try {
         const buffer = Buffer.from(trimmed, 'base64');
-        let transaction;
+        let simulation;
         
         try {
-            transaction = VersionedTransaction.deserialize(buffer);
+            const vTx = VersionedTransaction.deserialize(buffer);
+            simulation = await connection.simulateTransaction(vTx);
         } catch {
-            transaction = Transaction.from(buffer);
+            const legacyTx = Transaction.from(buffer);
+            simulation = await connection.simulateTransaction(legacyTx);
         }
-
-        const simulation = await connection.simulateTransaction(transaction);
         
         setResult({
           type: 'simulation',

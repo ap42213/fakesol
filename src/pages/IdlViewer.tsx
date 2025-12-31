@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
-import { Badge, Icons } from '../components/ui/index';
+import { Badge } from '../components/ui/index';
 import { SEO } from '../components/SEO';
 import { FiUpload, FiCode, FiDatabase, FiAlertCircle, FiList, FiType } from 'react-icons/fi';
 
@@ -132,7 +131,7 @@ export function IdlViewer() {
                 <textarea
                   value={jsonInput}
                   onChange={(e) => setJsonInput(e.target.value)}
-                  placeholder="{ \"version\": \"0.1.0\", ... }"
+                  placeholder='{ "version": "0.1.0", ... }'
                   className="w-full h-40 bg-black/20 border border-zinc-800 rounded-xl p-4 text-zinc-300 font-mono text-xs focus:outline-none focus:border-purple-500/50 transition-colors resize-none custom-scrollbar"
                 />
               </div>

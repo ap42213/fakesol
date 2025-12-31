@@ -3,7 +3,6 @@ import { Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
 import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
-import { Input } from '../components/ui/Input';
 import { Badge, CopyButton } from '../components/ui/index';
 import { SEO } from '../components/SEO';
 import { FiRefreshCw, FiKey, FiCode, FiHash, FiAlertTriangle, FiCheckCircle } from 'react-icons/fi';
@@ -80,7 +79,7 @@ export function KeypairConverter() {
         }
 
         // Verify it's a valid keypair
-        const keypair = Keypair.fromSecretKey(secretKey);
+        Keypair.fromSecretKey(secretKey);
 
         setOutputs({
           base58: bs58.encode(secretKey),
