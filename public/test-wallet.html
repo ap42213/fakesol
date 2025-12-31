@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FakeSOL Wallet Standard Test</title>
+    <style>
+        body { font-family: system-ui, sans-serif; max-width: 600px; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; }
+        .card { border: 1px solid #ccc; padding: 1rem; border-radius: 8px; margin-bottom: 1rem; }
+        button { background: #000; color: #fff; border: none; padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; }
+        button:hover { opacity: 0.8; }
+        code { background: #f4f4f4; padding: 0.2rem 0.4rem; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <h1>Wallet Standard Debugger</h1>
+    <p>This page listens for the <code>wallet-standard:register-wallet</code> event to detect available wallets.</p>
+    
+    <div id="status" class="card">
+        <strong>Status:</strong> Listening for wallets...
+    </div>
+
+    <div id="wallets"></div>
+
+    <script>
+        const walletsDiv = document.getElementById('wallets');
+        const statusDiv = document.getElementById('status');
+        const detectedWallets = new Set();
+
+        function renderWallet(wallet) {
+            if (detectedWallets.has(wallet.name)) return;
+            detectedWallets.add(wallet.name);
+
+            const el = document.createElement('div');
+            el.className = 'card';
+            el.innerHTML = `
+                <h3>
+                    <img src="${wallet.icon}" width="24" height="24" style="vertical-align: middle; margin-right: 8px;">
+                    ${wallet.name} <small>v${wallet.version}</small>
+                </h3>
+                <p><strong>Chains:</strong> ${wallet.chains.join(', ')}</p>
+                <p><strong>Features:</strong> ${Object.keys(wallet.features).join(', ')}</p>
+                <button onclick="connectWallet('${wallet.name}')">Connect</button>
+                <div id="output-${wallet.name}" style="margin-top: 1rem; display: none;">
+                    <pre style="background: #f4f4f4; padding: 0.5rem; overflow-x: auto;"></pre>
+                </div>
+            `;
+            walletsDiv.appendChild(el);
+            statusDiv.innerHTML = `<strong>Status:</strong> Detected ${detectedWallets.size} wallet(s)`;
+
+            // Store wallet instance for connection
+            window[`wallet_${wallet.name}`] = wallet;
+        }
+
+        window.connectWallet = async (name) => {
+            const wallet = window[`wallet_${name}`];
+            const outputDiv = document.getElementById(`output-${name}`);
+            const pre = outputDiv.querySelector('pre');
+            
+            try {
+                outputDiv.style.display = 'block';
+                pre.textContent = 'Connecting...';
+                
+                const connectFeature = wallet.features['standard:connect'];
+                if (!connectFeature) throw new Error('No standard:connect feature found');
+
+                const result = await connectFeature.connect();
+                pre.textContent = JSON.stringify(result, null, 2);
+            } catch (err) {
+                pre.textContent = 'Error: ' + err.message;
+            }
+        };
+
+        // 1. Listen for new wallets
+        window.addEventListener('wallet-standard:register-wallet', ({ detail: callback }) => {
+            callback({ register: renderWallet });
+        });
+
+        // 2. Dispatch event to request existing wallets (in case we loaded late)
+        // Note: This is not strictly part of the standard API for consumers, 
+        // but some adapters might respond to it or we just wait for the window event.
+        console.log('Listening for wallet-standard:register-wallet');
+    </script>
+</body>
+</html>
