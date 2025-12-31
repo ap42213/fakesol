@@ -19,7 +19,7 @@ const tools = [
     description: 'Create your own SPL tokens on Solana Devnet in seconds. No coding required.',
     icon: <FiBox className="w-6 h-6 text-purple-400" />,
     path: '/create-token',
-    color: 'from-purple-500 to-pink-500'
+    color: 'from-purple-500/20 to-purple-500/5 border border-purple-500/20'
   },
   {
     id: 'metadata-manager',
@@ -27,7 +27,7 @@ const tools = [
     description: 'Add names, symbols, and logos to your SPL tokens using Metaplex metadata.',
     icon: <FiTag className="w-6 h-6 text-blue-400" />,
     path: '/metadata',
-    color: 'from-blue-500 to-cyan-500'
+    color: 'from-blue-500/20 to-blue-500/5 border border-blue-500/20'
   },
   {
     id: 'pda-calculator',
@@ -35,7 +35,7 @@ const tools = [
     description: 'Deterministically derive Program Derived Addresses (PDAs) with custom seeds.',
     icon: <FiCpu className="w-6 h-6 text-green-400" />,
     path: '/pda',
-    color: 'from-green-500 to-emerald-500'
+    color: 'from-green-500/20 to-green-500/5 border border-green-500/20'
   },
   {
     id: 'account-inspector',
@@ -43,7 +43,7 @@ const tools = [
     description: 'Deep dive into any account on Devnet. View raw data, owner, and state.',
     icon: <FiSearch className="w-6 h-6 text-orange-400" />,
     path: '/inspector',
-    color: 'from-orange-500 to-yellow-500'
+    color: 'from-orange-500/20 to-orange-500/5 border border-orange-500/20'
   },
   {
     id: 'keypair-converter',
@@ -51,7 +51,7 @@ const tools = [
     description: 'Convert between Byte Array (JSON) and Base58 private key formats.',
     icon: <FiKey className="w-6 h-6 text-red-400" />,
     path: '/converter',
-    color: 'from-red-500 to-pink-500'
+    color: 'from-red-500/20 to-red-500/5 border border-red-500/20'
   },
   {
     id: 'transaction-decoder',
@@ -59,7 +59,7 @@ const tools = [
     description: 'Decode base58 or base64 transaction data into human-readable format.',
     icon: <FiCode className="w-6 h-6 text-indigo-400" />,
     path: '/decoder',
-    color: 'from-indigo-500 to-purple-500'
+    color: 'from-indigo-500/20 to-indigo-500/5 border border-indigo-500/20'
   },
   {
     id: 'idl-viewer',
@@ -67,7 +67,7 @@ const tools = [
     description: 'Fetch and visualize Anchor IDLs to understand program instructions.',
     icon: <FiFileText className="w-6 h-6 text-teal-400" />,
     path: '/idl',
-    color: 'from-teal-500 to-green-500'
+    color: 'from-teal-500/20 to-teal-500/5 border border-teal-500/20'
   }
 ];
 
