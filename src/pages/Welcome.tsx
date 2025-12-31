@@ -7,7 +7,7 @@ import { Card } from '../components/ui/Card';
 import { Icons, Badge, Modal } from '../components/ui/index';
 import { Logo } from '../components/Logo';
 import { SEO } from '../components/SEO';
-import { FiLogIn, FiUserPlus, FiGithub } from 'react-icons/fi';
+import { FiLogIn, FiUserPlus, FiGithub, FiCheck, FiInfo } from 'react-icons/fi';
 
 export function Welcome() {
   const [mode, setMode] = useState<'home' | 'import'>('home');
@@ -114,6 +114,21 @@ export function Welcome() {
                   <p className="text-zinc-400 leading-relaxed">
                     This wallet only works on Solana Devnet. Perfect for testing dApps without risking real funds.
                   </p>
+                  
+                  <div className="mt-4 grid grid-cols-1 gap-2">
+                    <div className="flex items-center gap-2 text-sm text-zinc-400/80">
+                      <FiCheck className="w-4 h-4 text-green-500/80" />
+                      <span>Safe environment for testing</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-zinc-400/80">
+                      <FiCheck className="w-4 h-4 text-green-500/80" />
+                      <span>Unlimited free Devnet SOL</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-zinc-400/80">
+                      <FiInfo className="w-4 h-4 text-blue-500/80" />
+                      <span>Tokens have no real world value</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </Card>
