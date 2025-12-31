@@ -121,8 +121,26 @@ export class FakeSolProvider extends EventEmitter {
 
 // Inject into window
 const provider = new FakeSolProvider();
-(window as any).solana = provider;
-(window as any).fakesol = provider;
+
+try {
+  Object.defineProperty(window, 'solana', {
+    value: provider,
+    writable: true,
+    configurable: true,
+  });
+} catch (e) {
+  console.warn('FakeSOL: Could not define window.solana', e);
+}
+
+try {
+  Object.defineProperty(window, 'fakesol', {
+    value: provider,
+    writable: true,
+    configurable: true,
+  });
+} catch (e) {
+  console.warn('FakeSOL: Could not define window.fakesol', e);
+}
 
 // Register immediately AND on load to cover all bases
 try {
