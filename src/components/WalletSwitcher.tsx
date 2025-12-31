@@ -27,6 +27,7 @@ export function WalletSwitcher() {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showManageModal, setShowManageModal] = useState(false);
   const [newWalletName, setNewWalletName] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
   const [editingWallet, setEditingWallet] = useState<SavedWallet | null>(null);
   const [editName, setEditName] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
@@ -47,15 +48,23 @@ export function WalletSwitcher() {
   };
 
   const handleCreateWallet = async () => {
-    if (user) {
-      await createAuthWallet(newWalletName || undefined);
-      // Sync the new wallet to walletStore
-      syncWalletsToStore();
-    } else {
-      createLocalWallet(newWalletName || undefined);
+    if (isCreating) return;
+    setIsCreating(true);
+    try {
+      if (user) {
+        await createAuthWallet(newWalletName || undefined);
+        // Sync the new wallet to walletStore
+        syncWalletsToStore();
+      } else {
+        createLocalWallet(newWalletName || undefined);
+      }
+    } catch (error) {
+      console.error('Failed to create wallet:', error);
+    } finally {
+      setIsCreating(false);
+      setNewWalletName('');
+      setShowAddModal(false);
     }
-    setNewWalletName('');
-    setShowAddModal(false);
   };
 
   const handleSwitchWallet = (walletId: string) => {
@@ -200,20 +209,23 @@ export function WalletSwitcher() {
             placeholder={`Wallet ${wallets.length + 1}`}
             value={newWalletName}
             onChange={(e) => setNewWalletName(e.target.value)}
+            disabled={isCreating}
           />
           <div className="flex gap-3">
             <Button
               variant="secondary"
               fullWidth
               onClick={() => setShowAddModal(false)}
+              disabled={isCreating}
             >
               Cancel
             </Button>
             <Button
               fullWidth
               onClick={handleCreateWallet}
+              disabled={isCreating}
             >
-              Create Wallet
+              {isCreating ? 'Creating...' : 'Create Wallet'}
             </Button>
           </div>
         </div>
