@@ -7,7 +7,7 @@ import { Card } from '../components/ui/Card';
 import { Icons, Badge, Modal } from '../components/ui/index';
 import { Logo } from '../components/Logo';
 import { SEO } from '../components/SEO';
-import { FiLogIn, FiUserPlus } from 'react-icons/fi';
+import { FiLogIn, FiUserPlus, FiGithub } from 'react-icons/fi';
 
 export function Welcome() {
   const [mode, setMode] = useState<'home' | 'import'>('home');
@@ -84,6 +84,18 @@ export function Welcome() {
               <p className="text-sm mt-2">
                 <span className="gradient-text font-semibold">Real testing. Fake SOL.</span>
               </p>
+              
+              <div className="mt-6 flex justify-center">
+                <a 
+                  href="https://github.com/ap42213/fakesol" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/50 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition-all text-sm group"
+                >
+                  <FiGithub className="w-4 h-4 group-hover:scale-110 transition-transform" />
+                  <span>Star on GitHub</span>
+                </a>
+              </div>
             </div>
 
             {/* Warning Card */}
