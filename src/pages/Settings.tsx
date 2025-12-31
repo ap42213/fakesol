@@ -183,9 +183,15 @@ export function Settings() {
       </div>
 
       {/* Version */}
-      <div className="text-center">
+      <div className="text-center space-y-2">
         <p className="text-zinc-600 text-sm">FakeSOL v0.1.0</p>
-        <p className="text-zinc-700 text-xs mt-1">Built for developers</p>
+        <p className="text-zinc-700 text-xs">Built for developers</p>
+        <a 
+          href="mailto:hello@fakesol.com" 
+          className="text-zinc-500 hover:text-purple-400 text-xs transition-colors"
+        >
+          Contact: hello@fakesol.com
+        </a>
       </div>
 
       {/* Private Key Modal */}

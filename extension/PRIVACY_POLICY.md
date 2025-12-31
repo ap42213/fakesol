@@ -53,6 +53,7 @@ We may update this policy. Changes will be posted on our GitHub repository.
 ## Contact
 
 For questions about this privacy policy:
+- Email: hello@fakesol.com
 - GitHub: https://github.com/ap42213/fakesol
 - Website: https://fakesol.com
 
