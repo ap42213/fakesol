@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useWalletStore } from '../store/walletStore';
-import { Keypair, SystemProgram, Transaction, PublicKey } from '@solana/web3.js';
+import { Keypair, SystemProgram, Transaction, PublicKey, ComputeBudgetProgram } from '@solana/web3.js';
 import { 
   createInitializeMintInstruction, 
   getAssociatedTokenAddress, 
@@ -19,7 +19,7 @@ import { SEO } from '../components/SEO';
 import { FiBox, FiCpu, FiLayers, FiCheck, FiAlertCircle, FiLoader } from 'react-icons/fi';
 
 export function TokenCreator() {
-  const { publicKey, keypair, connection } = useWalletStore();
+  const { publicKey, keypair, connection, balance } = useWalletStore();
   const { showToast } = useToast();
   
   const [isLoading, setIsLoading] = useState(false);
@@ -41,6 +41,11 @@ export function TokenCreator() {
     e.preventDefault();
     if (!publicKey || !keypair) {
       showToast('Please connect your wallet first', 'error');
+      return;
+    }
+
+    if (balance < 0.01) {
+      showToast('Insufficient SOL. Please request an airdrop first.', 'error');
       return;
     }
 
@@ -110,6 +115,7 @@ export function TokenCreator() {
 
       // Bundle transaction
       const transaction = new Transaction().add(
+        ComputeBudgetProgram.setComputeUnitLimit({ units: 400_000 }),
         createAccountIx,
         initializeMintIx,
         createATAIx,
