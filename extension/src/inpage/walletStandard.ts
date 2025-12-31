@@ -44,10 +44,15 @@ export function registerFakeSolWallet(provider: FakeSolProvider) {
             'standard:connect': {
                 version: '1.0.0',
                 connect: async () => {
-                    const { publicKey } = await provider.connect();
-                    accounts = [new FakeSolWalletAccount(publicKey)];
-                    emitChange({ accounts });
-                    return { accounts };
+                    try {
+                        const { publicKey } = await provider.connect();
+                        accounts = [new FakeSolWalletAccount(publicKey)];
+                        emitChange({ accounts });
+                        return { accounts };
+                    } catch (error) {
+                        console.error('FakeSOL: Connect failed', error);
+                        throw error;
+                    }
                 },
             },
             'standard:disconnect': {
