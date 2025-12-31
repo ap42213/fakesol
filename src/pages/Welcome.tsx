@@ -98,41 +98,6 @@ export function Welcome() {
               </div>
             </div>
 
-            {/* Warning Card */}
-            <Card variant="glass" className="mb-8 border-yellow-500/20 bg-yellow-500/5" padding="lg">
-              <div className="flex items-start gap-5">
-                <div className="p-3 bg-yellow-500/10 rounded-xl border border-yellow-500/20 shrink-0">
-                  <svg className="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                  </svg>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
-                    <h3 className="font-semibold text-white text-lg">Devnet Only</h3>
-                    <Badge variant="warning" className="bg-yellow-500/20 text-yellow-200 border-yellow-500/20">Test Network</Badge>
-                  </div>
-                  <p className="text-zinc-400 leading-relaxed">
-                    This wallet only works on Solana Devnet. Perfect for testing dApps without risking real funds.
-                  </p>
-                  
-                  <div className="mt-4 grid grid-cols-1 gap-2">
-                    <div className="flex items-center gap-2 text-sm text-zinc-400/80">
-                      <FiCheck className="w-4 h-4 text-green-500/80" />
-                      <span>Safe environment for testing</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-zinc-400/80">
-                      <FiCheck className="w-4 h-4 text-green-500/80" />
-                      <span>Unlimited free Devnet SOL</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-zinc-400/80">
-                      <FiInfo className="w-4 h-4 text-blue-500/80" />
-                      <span>Tokens have no real world value</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </Card>
-
             {/* Actions */}
             <div className="space-y-3">
               {/* Auth Options */}
@@ -188,6 +153,41 @@ export function Welcome() {
                 Import Existing Wallet
               </Button>
             </div>
+
+            {/* Warning Card */}
+            <Card variant="glass" className="mt-8 mb-6 border-yellow-500/20 bg-yellow-500/5" padding="lg">
+              <div className="flex items-start gap-5">
+                <div className="p-3 bg-yellow-500/10 rounded-xl border border-yellow-500/20 shrink-0">
+                  <svg className="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                  </svg>
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="font-semibold text-white text-lg">Devnet Only</h3>
+                    <Badge variant="warning" className="bg-yellow-500/20 text-yellow-200 border-yellow-500/20">Test Network</Badge>
+                  </div>
+                  <p className="text-zinc-400 leading-relaxed">
+                    This wallet only works on Solana Devnet. Perfect for testing dApps without risking real funds.
+                  </p>
+                  
+                  <div className="mt-4 grid grid-cols-1 gap-2">
+                    <div className="flex items-center gap-2 text-sm text-zinc-400/80">
+                      <FiCheck className="w-4 h-4 text-green-500/80" />
+                      <span>Safe environment for testing</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-zinc-400/80">
+                      <FiCheck className="w-4 h-4 text-green-500/80" />
+                      <span>Unlimited free Devnet SOL</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-zinc-400/80">
+                      <FiInfo className="w-4 h-4 text-blue-500/80" />
+                      <span>Tokens have no real world value</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </Card>
 
             {/* Benefits of signing up */}
             <Card variant="glass" className="mt-6 p-4">
