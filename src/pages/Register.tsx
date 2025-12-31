@@ -72,6 +72,18 @@ export function Register() {
           <h1 className="text-4xl font-extrabold text-white mb-2">FakeSOL</h1>
           <p className="text-zinc-400 text-lg">Create Account</p>
           <p className="text-text-muted mt-2">Sign up to save your wallets securely</p>
+          
+          <div className="mt-4 flex justify-center">
+            <a 
+              href="https://github.com/ap42213/fakesol" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-zinc-900/50 border border-zinc-800 text-zinc-400 hover:text-white hover:border-zinc-700 transition-all text-sm group"
+            >
+              <FiGithub className="w-4 h-4 group-hover:scale-110 transition-transform" />
+              <span>Star on GitHub</span>
+            </a>
+          </div>
         </div>
 
         {/* Form */}
