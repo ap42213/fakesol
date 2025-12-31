@@ -75,12 +75,28 @@ export class FakeSolProvider extends EventEmitter {
     options?: any
   ): Promise<{ signature: string }> {
     const signedTx = await this.signTransaction(transaction);
-    const connection = new Connection('https://api.devnet.solana.com');
+    
+    // Use a reliable public RPC endpoint for devnet
+    const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
     
     const rawTransaction = signedTx.serialize();
-    const signature = await connection.sendRawTransaction(rawTransaction, options);
     
-    return { signature };
+    // If options contains a connection or rpcUrl, use it? 
+    // Actually, standard behavior is the wallet broadcasts.
+    // The error 401 Unauthorized suggests the default RPC might be rate limited or blocked.
+    // Let's try to use the dApp's connection if possible, but we can't easily access it here.
+    // Instead, let's use a fallback or just return the signature and let the dApp broadcast?
+    // No, signAndSend implies we broadcast.
+    
+    try {
+        const signature = await connection.sendRawTransaction(rawTransaction, options);
+        return { signature };
+    } catch (e: any) {
+        console.error("FakeSOL: Broadcast failed", e);
+        // Fallback: If the wallet's RPC fails, maybe we can just return the signature 
+        // and hope the dApp handles the error or we can try another RPC.
+        throw e;
+    }
   }
 
   async signMessage(message: Uint8Array, display?: string): Promise<{ signature: Uint8Array; publicKey: PublicKey }> {
