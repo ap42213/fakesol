@@ -124,13 +124,18 @@ const provider = new FakeSolProvider();
 (window as any).solana = provider;
 (window as any).fakesol = provider;
 
-// Wait for window load to ensure other scripts are ready
-if (document.readyState === 'complete') {
+// Register immediately AND on load to cover all bases
+try {
   registerFakeSolWallet(provider);
-} else {
-  window.addEventListener('load', () => {
+} catch (e) { console.error(e); }
+
+window.addEventListener('load', () => {
+  try {
+    // Re-register or ensure registration on load
+    // The standard allows multiple registrations, but usually we just want to ensure one stuck
+    console.log('FakeSOL: Window loaded, ensuring registration');
     registerFakeSolWallet(provider);
-  });
-}
+  } catch (e) { console.error(e); }
+});
 
 console.log('FakeSOL Wallet Provider Injected');

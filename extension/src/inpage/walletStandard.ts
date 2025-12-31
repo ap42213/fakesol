@@ -123,7 +123,9 @@ export function registerFakeSolWallet(provider: FakeSolProvider) {
 
     try {
         registerWallet(wallet);
-        console.log('FakeSOL: Wallet Standard registered successfully', wallet);
+        // Dispatch a custom event for legacy/custom adapters that might be listening
+        window.dispatchEvent(new CustomEvent('fakesol#initialized', { detail: { wallet } }));
+        console.log('FakeSOL: Wallet Standard registered successfully');
     } catch (error) {
         console.error('FakeSOL: Failed to register wallet', error);
     }
