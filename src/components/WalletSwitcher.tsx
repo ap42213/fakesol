@@ -34,9 +34,23 @@ export function WalletSwitcher() {
 
   const activeWallet = wallets.find(w => w.id === activeWalletId);
 
+  // Helper to sync authStore wallets to walletStore
+  const syncWalletsToStore = () => {
+    const authWallets = useAuthStore.getState().wallets;
+    if (authWallets.length > 0) {
+      const formattedWallets = authWallets.map((w: any) => ({
+        ...w,
+        createdAt: typeof w.createdAt === 'string' ? new Date(w.createdAt).getTime() : w.createdAt
+      }));
+      useWalletStore.getState().setWallets(formattedWallets);
+    }
+  };
+
   const handleCreateWallet = async () => {
     if (user) {
       await createAuthWallet(newWalletName || undefined);
+      // Sync the new wallet to walletStore
+      syncWalletsToStore();
     } else {
       createLocalWallet(newWalletName || undefined);
     }
@@ -58,6 +72,7 @@ export function WalletSwitcher() {
     if (editingWallet && editName.trim()) {
       if (user) {
         await renameAuthWallet(editingWallet.id, editName);
+        syncWalletsToStore();
       } else {
         renameLocalWallet(editingWallet.id, editName);
       }
@@ -69,6 +84,7 @@ export function WalletSwitcher() {
   const handleDelete = async (walletId: string) => {
     if (user) {
       await deleteAuthWallet(walletId);
+      syncWalletsToStore();
     } else {
       deleteLocalWallet(walletId);
     }
