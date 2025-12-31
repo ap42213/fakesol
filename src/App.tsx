@@ -10,6 +10,7 @@ import { Explore } from './pages/Explore';
 import { TokenCreator } from './pages/TokenCreator';
 import { KeypairConverter } from './pages/KeypairConverter';
 import { TransactionDecoder } from './pages/TransactionDecoder';
+import { IdlViewer } from './pages/IdlViewer';
 import { Settings } from './pages/Settings';
 import { Welcome } from './pages/Welcome';
 import { Extension } from './pages/Extension';
@@ -67,6 +68,7 @@ function App() {
               <Route path="/create-token" element={<TokenCreator />} />
               <Route path="/converter" element={<KeypairConverter />} />
               <Route path="/decoder" element={<TransactionDecoder />} />
+              <Route path="/idl" element={<IdlViewer />} />
               <Route path="/explore" element={<Explore />} />
               <Route path="/extension" element={<Extension />} />
               <Route path="/settings" element={<Settings />} />

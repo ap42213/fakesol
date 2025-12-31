@@ -42,6 +42,12 @@ const DecoderIcon = (
   </svg>
 );
 
+const IdlIcon = (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+  </svg>
+);
+
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: Icons.wallet },
   { path: '/send', label: 'Send', icon: Icons.send },
@@ -50,6 +56,7 @@ const navItems = [
   { path: '/create-token', label: 'Mint Token', icon: MintIcon },
   { path: '/converter', label: 'Key Converter', icon: ConverterIcon },
   { path: '/decoder', label: 'Tx Decoder', icon: DecoderIcon },
+  { path: '/idl', label: 'IDL Viewer', icon: IdlIcon },
   { path: '/explore', label: 'Explore', icon: ExploreIcon },
   { path: '/transactions', label: 'History', icon: Icons.history },
   { path: '/extension', label: 'Extension', icon: ExtensionIcon },
