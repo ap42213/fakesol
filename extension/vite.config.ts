@@ -24,6 +24,7 @@ export default defineConfig({
         entryFileNames: 'src/[name]/index.js',
         chunkFileNames: 'assets/[name].[hash].js',
         assetFileNames: 'assets/[name].[hash].[ext]',
+        // format: 'iife', // Removed to fix build error
       },
     },
   },

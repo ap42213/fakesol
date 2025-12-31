@@ -2,6 +2,7 @@
 const container = document.head || document.documentElement;
 const script = document.createElement('script');
 script.src = chrome.runtime.getURL('src/inpage/index.js');
+script.type = 'module'; // Add this line to treat the script as a module
 script.setAttribute('async', 'false');
 container.insertBefore(script, container.children[0]);
 container.removeChild(script);
