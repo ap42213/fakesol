@@ -17,7 +17,7 @@ const ICON = 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcv
 class FakeSolWalletAccount implements WalletAccount {
     readonly address: string;
     readonly publicKey: Uint8Array;
-    readonly chains = ['solana:devnet'] as const;
+    readonly chains = ['solana:mainnet', 'solana:devnet'] as const;
     readonly features = ['solana:signAndSendTransaction', 'solana:signTransaction', 'solana:signMessage'] as const;
 
     constructor(publicKey: PublicKey) {
@@ -39,7 +39,7 @@ export function registerFakeSolWallet(provider: FakeSolProvider) {
         version: '1.0.0',
         name: 'FakeSOL',
         icon: ICON,
-        chains: ['solana:devnet'],
+        chains: ['solana:mainnet', 'solana:devnet'],
         features: {
             'standard:connect': {
                 version: '1.0.0',
@@ -75,7 +75,7 @@ export function registerFakeSolWallet(provider: FakeSolProvider) {
                 version: '1.0.0',
                 supportedTransactionVersions: ['legacy', 0],
                 signAndSendTransaction: async ({ transaction, chain, options }: { transaction: Uint8Array, chain: string, options?: any }) => {
-                    if (chain !== 'solana:devnet') throw new Error('Unsupported chain');
+                    if (chain !== 'solana:devnet' && chain !== 'solana:mainnet') throw new Error('Unsupported chain');
                     const versionedTx = VersionedTransaction.deserialize(transaction);
                     const { signature } = await provider.signAndSendTransaction(versionedTx, options);
                     return [{ signature: bs58.decode(signature) }];
@@ -85,7 +85,7 @@ export function registerFakeSolWallet(provider: FakeSolProvider) {
                 version: '1.0.0',
                 supportedTransactionVersions: ['legacy', 0],
                 signTransaction: async ({ transaction, chain }: { transaction: Uint8Array, chain: string }) => {
-                    if (chain !== 'solana:devnet') throw new Error('Unsupported chain');
+                    if (chain !== 'solana:devnet' && chain !== 'solana:mainnet') throw new Error('Unsupported chain');
                     const versionedTx = VersionedTransaction.deserialize(transaction);
                     const signedTx = await provider.signTransaction(versionedTx);
                     return [{ signedTransaction: signedTx.serialize() }];
@@ -122,4 +122,5 @@ export function registerFakeSolWallet(provider: FakeSolProvider) {
     });
 
     registerWallet(wallet);
+    console.log('FakeSOL: Wallet Standard registered');
 }

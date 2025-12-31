@@ -1,6 +1,6 @@
 {
   "name": "fakesol-extension",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "FakeSOL Chrome Extension - The devnet-only Solana wallet",
   "type": "module",
   "scripts": {
