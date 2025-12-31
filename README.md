@@ -19,6 +19,28 @@ The devnet-only Solana wallet. **Real testing. Fake SOL.**
 - 📊 **Analytics** - Track signups and user activity (admin)
 - 🎨 **Beautiful UI** - Dark theme with Solana gradient accents
 
+## Advanced Developer Tools
+
+FakeSOL includes a suite of tools designed for Solana developers to debug and build faster.
+
+### 🧮 PDA Calculator
+Deterministically derive Program Derived Addresses (PDAs) directly in the browser.
+- **Dynamic Seeds**: Support for String, PublicKey, u8, u16, u32, u64 seeds.
+- **Bump Finding**: Automatically calculates the canonical bump seed.
+- **Validation**: Real-time validation of Program IDs and Public Keys.
+
+### 🔍 Account Inspector
+Deep dive into any account on the Devnet.
+- **Raw Data View**: See the raw byte data of an account.
+- **Program Detection**: Identifies executable accounts and their owners.
+- **State Analysis**: View lamports, rent epoch, and data size.
+
+### 🏷️ Metadata Manager
+Manage Metaplex Token Metadata without writing scripts.
+- **Create Metadata**: Add Name, Symbol, and URI to any SPL Token.
+- **Update Metadata**: Modify existing metadata for tokens you control.
+- **Visual Interface**: No CLI required—just connect your wallet and edit.
+
 ## Architecture
 
 ```
