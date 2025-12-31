@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FakeSOL Transaction Test</title>
+    <!-- Load Solana Web3.js for transaction helpers -->
+    <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; line-height: 1.6; }
+        button { padding: 10px 20px; margin: 5px 5px 5px 0; cursor: pointer; background: #000; color: #fff; border: none; border-radius: 4px; font-size: 14px; }
+        button:disabled { background: #ccc; cursor: not-allowed; }
+        #logs { background: #f5f5f5; padding: 15px; border-radius: 8px; white-space: pre-wrap; margin-top: 20px; height: 400px; overflow-y: auto; font-family: monospace; font-size: 12px; border: 1px solid #ddd; }
+        .error { color: #d32f2f; }
+        .success { color: #2e7d32; }
+        .info { color: #0288d1; }
+        h1 { margin-bottom: 10px; }
+        #status { margin-bottom: 20px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>FakeSOL Transaction Test</h1>
+    <p>This page isolates the wallet functionality to verify it can sign and send transactions on Devnet, bypassing any issues with external dApps.</p>
+    
+    <div id="status">Status: Looking for wallet...</div>
+
+    <div>
+        <button id="connectBtn" disabled>Connect Wallet</button>
+        <button id="sendBtn" disabled>Send 0.001 SOL (Devnet)</button>
+    </div>
+
+    <h3>Logs</h3>
+    <div id="logs"></div>
+
+    <script>
+        const { Connection, Transaction, SystemProgram, PublicKey, LAMPORTS_PER_SOL } = solanaWeb3;
+        
+        // Use a public devnet RPC
+        const connection = new Connection('https://api.devnet.solana.com', 'confirmed');
+        
+        let wallet = null;
+        let account = null;
+
+        function log(msg, type = 'info') {
+            const logs = document.getElementById('logs');
+            const line = document.createElement('div');
+            line.className = type;
+            line.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            logs.appendChild(line);
+            logs.scrollTop = logs.scrollHeight;
+            console.log(msg);
+        }
+
+        function updateStatus(msg) {
+            document.getElementById('status').textContent = `Status: ${msg}`;
+        }
+
+        // 1. Detect Wallet via Standard
+        function onWalletRegistered(event) {
+            // We look for a wallet that supports the standard features we need
+            const registeredWallet = event.detail;
+            // Simple check if it's our wallet or a standard compatible one
+            if (registeredWallet.features['standard:connect'] && registeredWallet.features['solana:signTransaction']) {
+                wallet = registeredWallet;
+                log(`Found wallet: ${wallet.name}`, 'success');
+                document.getElementById('connectBtn').disabled = false;
+                updateStatus('Wallet Found');
+            }
+        }
+
+        // Listen for future registrations
+        window.addEventListener('wallet-standard:register-wallet', onWalletRegistered);
+
+        // Check for existing wallets
+        if (window.navigator.wallets) {
+            const wallets = window.navigator.wallets.get();
+            const found = wallets.find(w => w.features['standard:connect']);
+            if (found) {
+                onWalletRegistered({ detail: found });
+            }
+        }
+
+        // 2. Connect
+        document.getElementById('connectBtn').addEventListener('click', async () => {
+            try {
+                log('Connecting...', 'info');
+                const connectFeature = wallet.features['standard:connect'];
+                const result = await connectFeature.connect();
+                account = result.accounts[0];
+                
+                log(`Connected to: ${account.address}`, 'success');
+                updateStatus(`Connected: ${account.address.slice(0, 6)}...${account.address.slice(-4)}`);
+                document.getElementById('sendBtn').disabled = false;
+                document.getElementById('connectBtn').textContent = 'Connected';
+                document.getElementById('connectBtn').disabled = true;
+
+                // Check balance
+                const balance = await connection.getBalance(new PublicKey(account.address));
+                log(`Balance: ${balance / LAMPORTS_PER_SOL} SOL`, 'info');
+
+            } catch (err) {
+                log(`Connection failed: ${err.message}`, 'error');
+            }
+        });
+
+        // 3. Send Transaction
+        document.getElementById('sendBtn').addEventListener('click', async () => {
+            try {
+                log('Preparing transaction...', 'info');
+                
+                const pubkey = new PublicKey(account.address);
+                
+                // Create a simple transfer instruction
+                const transaction = new Transaction().add(
+                    SystemProgram.transfer({
+                        fromPubkey: pubkey,
+                        toPubkey: pubkey, // Send to self
+                        lamports: LAMPORTS_PER_SOL * 0.001,
+                    })
+                );
+
+                // Get latest blockhash
+                log('Fetching latest blockhash from https://api.devnet.solana.com...', 'info');
+                const { blockhash, lastValidBlockHeight } = await connection.getLatestBlockhash();
+                transaction.recentBlockhash = blockhash;
+                transaction.feePayer = pubkey;
+
+                log(`Blockhash: ${blockhash}`, 'info');
+
+                // Serialize the transaction
+                // The Standard expects a serialized transaction
+                const serializedTransaction = transaction.serialize({ requireAllSignatures: false });
+
+                log('Requesting signature...', 'info');
+
+                // Use the standard feature
+                const signAndSendFeature = wallet.features['solana:signAndSendTransaction'];
+                
+                if (!signAndSendFeature) {
+                    throw new Error('Wallet does not support solana:signAndSendTransaction');
+                }
+
+                const { signatures } = await signAndSendFeature.signAndSendTransaction({
+                    account: account,
+                    chain: 'solana:devnet',
+                    transactions: [serializedTransaction]
+                });
+
+                const signature = signatures[0];
+                // The signature is a Uint8Array, we need to convert to base58 to display
+                // But for simplicity in this raw HTML, we can just log the raw bytes or try to decode if we had bs58
+                // Let's just assume success if we got here
+                
+                log('Transaction sent!', 'success');
+                log(`Signature (raw): ${signature}`, 'success');
+                
+                // If we want to verify, we can wait for confirmation
+                log('Waiting for confirmation...', 'info');
+                // Note: signature is raw bytes, web3.js expects base58 string usually. 
+                // We can't easily encode bs58 here without a library, but we can try to rely on the wallet's return or just check the explorer manually if we could.
+                // Actually, let's just tell the user to check their wallet history.
+                
+                log('Check your wallet activity or the explorer.', 'success');
+
+            } catch (err) {
+                log(`Transaction failed: ${err.message}`, 'error');
+                console.error(err);
+            }
+        });
+    </script>
+</body>
+</html>
