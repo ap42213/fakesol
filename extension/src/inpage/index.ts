@@ -124,6 +124,10 @@ const provider = new FakeSolProvider();
 (window as any).solana = provider;
 (window as any).fakesol = provider;
 
-registerFakeSolWallet(provider);
+try {
+  registerFakeSolWallet(provider);
+} catch (err) {
+  console.error('FakeSOL: Failed to register Wallet Standard', err);
+}
 
 console.log('FakeSOL Wallet Provider Injected');
