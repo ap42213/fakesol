@@ -30,12 +30,19 @@ const MintIcon = (
   </svg>
 );
 
+const ConverterIcon = (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+  </svg>
+);
+
 const navItems = [
   { path: '/dashboard', label: 'Dashboard', icon: Icons.wallet },
   { path: '/send', label: 'Send', icon: Icons.send },
   { path: '/receive', label: 'Receive', icon: Icons.receive },
   { path: '/tokens', label: 'Tokens', icon: TokenIcon },
   { path: '/create-token', label: 'Mint Token', icon: MintIcon },
+  { path: '/converter', label: 'Key Converter', icon: ConverterIcon },
   { path: '/explore', label: 'Explore', icon: ExploreIcon },
   { path: '/transactions', label: 'History', icon: Icons.history },
   { path: '/extension', label: 'Extension', icon: ExtensionIcon },
