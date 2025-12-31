@@ -8,8 +8,12 @@ import { Transactions } from './pages/Transactions';
 import { Tokens } from './pages/Tokens';
 import { Explore } from './pages/Explore';
 import { TokenCreator } from './pages/TokenCreator';
+import { TokenManager } from './pages/TokenManager';
 import { MetadataManager } from './pages/MetadataManager';
 import { KeypairConverter } from './pages/KeypairConverter';
+import { UnitConverter } from './pages/UnitConverter';
+import { VanityGenerator } from './pages/VanityGenerator';
+import { RpcHealth } from './pages/RpcHealth';
 import { TransactionDecoder } from './pages/TransactionDecoder';
 import { IdlViewer } from './pages/IdlViewer';
 import { PdaCalculator } from './pages/PdaCalculator';
@@ -70,8 +74,12 @@ function App() {
               <Route path="/transactions" element={<Transactions />} />
               <Route path="/tokens" element={<Tokens />} />
               <Route path="/create-token" element={<TokenCreator />} />
+              <Route path="/manage-token" element={<TokenManager />} />
               <Route path="/metadata" element={<MetadataManager />} />
               <Route path="/converter" element={<KeypairConverter />} />
+              <Route path="/unit-converter" element={<UnitConverter />} />
+              <Route path="/vanity" element={<VanityGenerator />} />
+              <Route path="/rpc" element={<RpcHealth />} />
               <Route path="/decoder" element={<TransactionDecoder />} />
               <Route path="/idl" element={<IdlViewer />} />
               <Route path="/pda" element={<PdaCalculator />} />
