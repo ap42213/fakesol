@@ -8,6 +8,7 @@ import { Transactions } from './pages/Transactions';
 import { Tokens } from './pages/Tokens';
 import { Explore } from './pages/Explore';
 import { TokenCreator } from './pages/TokenCreator';
+import { MetadataManager } from './pages/MetadataManager';
 import { KeypairConverter } from './pages/KeypairConverter';
 import { TransactionDecoder } from './pages/TransactionDecoder';
 import { IdlViewer } from './pages/IdlViewer';
@@ -68,6 +69,7 @@ function App() {
               <Route path="/transactions" element={<Transactions />} />
               <Route path="/tokens" element={<Tokens />} />
               <Route path="/create-token" element={<TokenCreator />} />
+              <Route path="/metadata" element={<MetadataManager />} />
               <Route path="/converter" element={<KeypairConverter />} />
               <Route path="/decoder" element={<TransactionDecoder />} />
               <Route path="/idl" element={<IdlViewer />} />
