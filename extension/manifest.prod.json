@@ -37,7 +37,7 @@
   },
   "web_accessible_resources": [
     {
-      "resources": ["src/inpage/index.js"],
+      "resources": ["src/inpage/index.js", "assets/*.js"],
       "matches": ["<all_urls>"]
     }
   ]
