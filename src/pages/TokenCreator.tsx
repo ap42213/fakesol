@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useWalletStore } from '../store/walletStore';
 import { Keypair, SystemProgram, Transaction, PublicKey } from '@solana/web3.js';
 import { 
@@ -335,10 +336,7 @@ export function TokenCreator() {
               <div className="text-sm text-blue-200/80">
                 <p className="font-semibold text-blue-200 mb-1">Note on Metadata</p>
                 <p>
-                  This tool creates a standard SPL Token. To add a logo and name that appears in all wallets, you would typically need to create a Metaplex Metadata account.
-                </p>
-                <p className="mt-2 opacity-60">
-                  (Metadata support coming soon)
+                  This tool creates a standard SPL Token. To add a logo and name that appears in all wallets, use the <Link to="/metadata" className="text-blue-400 hover:text-blue-300 underline">Metadata Manager</Link>.
                 </p>
               </div>
             </div>
