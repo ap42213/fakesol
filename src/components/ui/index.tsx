@@ -91,9 +91,10 @@ export const Icons = {
 interface BadgeProps {
   children: ReactNode;
   variant?: 'default' | 'success' | 'warning' | 'error' | 'purple';
+  className?: string;
 }
 
-export function Badge({ children, variant = 'default' }: BadgeProps) {
+export function Badge({ children, variant = 'default', className = '' }: BadgeProps) {
   const variants = {
     default: 'bg-zinc-800 text-zinc-300',
     success: 'bg-green-500/10 text-green-400 border border-green-500/20',
@@ -103,7 +104,7 @@ export function Badge({ children, variant = 'default' }: BadgeProps) {
   };
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${variants[variant]}`}>
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${variants[variant]} ${className}`}>
       {children}
     </span>
   );
