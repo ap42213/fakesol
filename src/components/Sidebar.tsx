@@ -39,7 +39,7 @@ export function Sidebar() {
   const location = useLocation();
   const navigate = useNavigate();
   const { publicKey: guestPublicKey, balance: guestBalance, disconnect: guestDisconnect } = useWalletStore();
-  const { user, wallets, logout, getActiveWallet } = useAuthStore();
+  const { user, logout, getActiveWallet } = useAuthStore();
 
   const isActive = (path: string) => location.pathname === path;
   
