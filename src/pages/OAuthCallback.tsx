@@ -1,11 +1,13 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
+import { useWalletStore } from '../store/walletStore';
 
 export function OAuthCallback() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { checkAuth } = useAuthStore();
+  const { setWallets } = useWalletStore();
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -23,6 +25,15 @@ export function OAuthCallback() {
       useAuthStore.setState({ token });
       
       checkAuth().then(() => {
+        // Get the updated wallets and sync to walletStore
+        const { wallets } = useAuthStore.getState();
+        if (wallets.length > 0) {
+          const formattedWallets = wallets.map((w: any) => ({
+            ...w,
+            createdAt: typeof w.createdAt === 'string' ? new Date(w.createdAt).getTime() : w.createdAt
+          }));
+          setWallets(formattedWallets);
+        }
         navigate('/dashboard');
       }).catch(() => {
         setError('Failed to verify authentication');
@@ -32,7 +43,7 @@ export function OAuthCallback() {
       setError('No authentication token received');
       setTimeout(() => navigate('/login'), 3000);
     }
-  }, [searchParams, navigate, checkAuth]);
+  }, [searchParams, navigate, checkAuth, setWallets]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-background-lighter">
