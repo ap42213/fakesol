@@ -121,6 +121,10 @@ export function registerFakeSolWallet(provider: FakeSolProvider) {
         emitChange({ accounts });
     });
 
-    registerWallet(wallet);
-    console.log('FakeSOL: Wallet Standard registered');
+    try {
+        registerWallet(wallet);
+        console.log('FakeSOL: Wallet Standard registered successfully', wallet);
+    } catch (error) {
+        console.error('FakeSOL: Failed to register wallet', error);
+    }
 }
