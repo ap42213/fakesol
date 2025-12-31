@@ -2,8 +2,9 @@ import EventEmitter from 'eventemitter3';
 import { PublicKey, Transaction, VersionedTransaction, Connection } from '@solana/web3.js';
 import bs58 from 'bs58';
 import { Buffer } from 'buffer';
+import { registerFakeSolWallet } from './walletStandard';
 
-class FakeSolProvider extends EventEmitter {
+export class FakeSolProvider extends EventEmitter {
   publicKey: PublicKey | null = null;
   isConnected: boolean = false;
   isPhantom: boolean = true;
@@ -122,5 +123,7 @@ class FakeSolProvider extends EventEmitter {
 const provider = new FakeSolProvider();
 (window as any).solana = provider;
 (window as any).fakesol = provider;
+
+registerFakeSolWallet(provider);
 
 console.log('FakeSOL Wallet Provider Injected');

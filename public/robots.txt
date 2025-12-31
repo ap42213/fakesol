@@ -1,5 +1,6 @@
 User-agent: *
 Allow: /
+Sitemap: https://fakesol.com/sitemap.xml
 
 User-agent: Twitterbot
 Allow: /

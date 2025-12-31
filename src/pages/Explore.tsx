@@ -3,6 +3,7 @@ import { Button } from '../components/ui/Button';
 import { Card } from '../components/ui/Card';
 import { Icons, Badge } from '../components/ui/index';
 import { api } from '../lib/api';
+import { SEO } from '../components/SEO';
 
 interface Project {
   id: string;
@@ -241,6 +242,11 @@ export function Explore() {
 
   return (
     <div className="space-y-6 pb-20 lg:pb-0">
+      <SEO 
+        title="Explore Projects" 
+        description="Discover Solana devnet projects, dApps, and tools. Find projects looking for testers."
+        canonical="https://fakesol.com/explore"
+      />
       {/* Header */}
       <div>
         <h1 className="text-2xl font-bold text-white">Explore Projects</h1>

@@ -7,6 +7,7 @@ import { Icons, Badge, CopyButton, useToast } from '../components/ui/index';
 import { shortenAddress } from '../lib/solana';
 import { Logo } from '../components/Logo';
 import { api } from '../lib/api';
+import { SEO } from '../components/SEO';
 
 const testerSpotlight = [
   {
@@ -130,6 +131,11 @@ export function Dashboard() {
 
   return (
     <div className="space-y-6 pb-20 lg:pb-0">
+      <SEO 
+        title="Dashboard" 
+        description="Manage your FakeSOL devnet wallet, view transactions, and request airdrops."
+        canonical="https://fakesol.com/dashboard"
+      />
       {/* Page Header */}
       <div className="flex items-center justify-between">
         <div>

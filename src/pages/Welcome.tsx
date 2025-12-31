@@ -6,6 +6,7 @@ import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
 import { Icons, Badge, Modal } from '../components/ui/index';
 import { Logo } from '../components/Logo';
+import { SEO } from '../components/SEO';
 import { FiLogIn, FiUserPlus } from 'react-icons/fi';
 
 export function Welcome() {
@@ -57,6 +58,11 @@ export function Welcome() {
 
   return (
     <div className="min-h-screen bg-zinc-950 flex items-center justify-center p-4 relative overflow-hidden">
+      <SEO 
+        title="FakeSOL - Devnet Wallet" 
+        description="The devnet-only Solana wallet for developers. Real testing. Fake SOL. Safe environment for testing dApps."
+        canonical="https://fakesol.com/"
+      />
       {/* Background Effects */}
       <div className="absolute inset-0 overflow-hidden">
         <div className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-purple-500/20 via-transparent to-transparent rounded-full blur-3xl" />

@@ -4,6 +4,7 @@ import { useAuthStore } from '../store/authStore';
 import { FiAlertCircle, FiUser, FiGithub } from 'react-icons/fi';
 import { FcGoogle } from 'react-icons/fc';
 import { Logo } from '../components/Logo';
+import { SEO } from '../components/SEO';
 
 // Use runtime env if available, otherwise build time env, otherwise default based on mode
 const API_URL = (window as any).__ENV__?.VITE_API_URL || import.meta.env.VITE_API_URL || (import.meta.env.PROD ? '' : 'http://localhost:3001');
@@ -38,6 +39,11 @@ export function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-background to-background-lighter p-4">
+      <SEO 
+        title="Login" 
+        description="Sign in to your FakeSOL account to manage your devnet wallets."
+        canonical="https://fakesol.com/login"
+      />
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="text-center mb-8">

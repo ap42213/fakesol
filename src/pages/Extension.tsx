@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { FiDownload, FiChrome, FiCheck, FiCopy } from 'react-icons/fi';
 import { useAuthStore } from '../store/authStore';
 import { useWalletStore } from '../store/walletStore';
+import { SEO } from '../components/SEO';
 
 export function Extension() {
   const [copied, setCopied] = useState(false);
@@ -50,6 +51,11 @@ export function Extension() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
+      <SEO 
+        title="Chrome Extension" 
+        description="Download the FakeSOL Chrome Extension to connect to Solana dApps on devnet."
+        canonical="https://fakesol.com/extension"
+      />
       {/* Header */}
       <div className="text-center">
         <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-br from-primary to-secondary mb-4">

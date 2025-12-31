@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FakeSOL Social Images Preview</title>
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+      body {
+        margin: 0;
+        font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Apple Color Emoji",
+          "Segoe UI Emoji";
+        background: #09090b;
+        color: #fafafa;
+      }
+      header {
+        padding: 24px;
+        border-bottom: 1px solid #27272a;
+        position: sticky;
+        top: 0;
+        background: rgba(9, 9, 11, 0.9);
+        backdrop-filter: blur(8px);
+      }
+      h1 {
+        margin: 0 0 6px 0;
+        font-size: 20px;
+      }
+      p {
+        margin: 0;
+        color: #a1a1aa;
+        font-size: 14px;
+      }
+      main {
+        padding: 24px;
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        gap: 18px;
+      }
+      .card {
+        border: 1px solid #27272a;
+        border-radius: 14px;
+        background: #0b0b10;
+        overflow: hidden;
+      }
+      .meta {
+        padding: 12px 14px;
+        border-bottom: 1px solid #27272a;
+        display: flex;
+        justify-content: space-between;
+        gap: 10px;
+        align-items: baseline;
+      }
+      .name {
+        font-weight: 600;
+        font-size: 14px;
+      }
+      .hint {
+        color: #a1a1aa;
+        font-size: 12px;
+      }
+      img {
+        width: 100%;
+        height: auto;
+        display: block;
+        background: #09090b;
+      }
+      .actions {
+        display: flex;
+        gap: 10px;
+        padding: 12px 14px;
+        border-top: 1px solid #27272a;
+      }
+      a {
+        color: #14f195;
+        text-decoration: none;
+        font-size: 13px;
+      }
+      a:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>FakeSOL — X/Twitter Social Images</h1>
+      <p>Preview gallery for <strong>1200×675</strong> PNGs in <code>/public/social</code>.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <div class="meta"><span class="name">hero-landing.png</span><span class="hint">Hero / launch vibe</span></div>
+        <img src="/social/hero-landing.png" alt="hero-landing" />
+        <div class="actions"><a href="/social/hero-landing.png" target="_blank" rel="noreferrer">Open full</a></div>
+      </section>
+
+      <section class="card">
+        <div class="meta"><span class="name">feature-grid.png</span><span class="hint">Benefits grid</span></div>
+        <img src="/social/feature-grid.png" alt="feature-grid" />
+        <div class="actions"><a href="/social/feature-grid.png" target="_blank" rel="noreferrer">Open full</a></div>
+      </section>
+
+      <section class="card">
+        <div class="meta"><span class="name">extension-popup.png</span><span class="hint">Extension demo</span></div>
+        <img src="/social/extension-popup.png" alt="extension-popup" />
+        <div class="actions"><a href="/social/extension-popup.png" target="_blank" rel="noreferrer">Open full</a></div>
+      </section>
+
+      <section class="card">
+        <div class="meta"><span class="name">developer-testimonial.png</span><span class="hint">Social proof</span></div>
+        <img src="/social/developer-testimonial.png" alt="developer-testimonial" />
+        <div class="actions"><a href="/social/developer-testimonial.png" target="_blank" rel="noreferrer">Open full</a></div>
+      </section>
+
+      <section class="card">
+        <div class="meta"><span class="name">mobile-desktop.png</span><span class="hint">Responsive mock</span></div>
+        <img src="/social/mobile-desktop.png" alt="mobile-desktop" />
+        <div class="actions"><a href="/social/mobile-desktop.png" target="_blank" rel="noreferrer">Open full</a></div>
+      </section>
+
+      <section class="card">
+        <div class="meta"><span class="name">before-after.png</span><span class="hint">Problem → solution</span></div>
+        <img src="/social/before-after.png" alt="before-after" />
+        <div class="actions"><a href="/social/before-after.png" target="_blank" rel="noreferrer">Open full</a></div>
+      </section>
+
+      <section class="card">
+        <div class="meta"><span class="name">cta-focused.png</span><span class="hint">Hard CTA</span></div>
+        <img src="/social/cta-focused.png" alt="cta-focused" />
+        <div class="actions"><a href="/social/cta-focused.png" target="_blank" rel="noreferrer">Open full</a></div>
+      </section>
+    </main>
+  </body>
+</html>
