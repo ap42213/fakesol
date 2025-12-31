@@ -12,6 +12,7 @@ import { KeypairConverter } from './pages/KeypairConverter';
 import { TransactionDecoder } from './pages/TransactionDecoder';
 import { IdlViewer } from './pages/IdlViewer';
 import { PdaCalculator } from './pages/PdaCalculator';
+import { AccountInspector } from './pages/AccountInspector';
 import { Settings } from './pages/Settings';
 import { Welcome } from './pages/Welcome';
 import { Extension } from './pages/Extension';
@@ -71,6 +72,7 @@ function App() {
               <Route path="/decoder" element={<TransactionDecoder />} />
               <Route path="/idl" element={<IdlViewer />} />
               <Route path="/pda" element={<PdaCalculator />} />
+              <Route path="/inspector" element={<AccountInspector />} />
               <Route path="/explore" element={<Explore />} />
               <Route path="/extension" element={<Extension />} />
               <Route path="/settings" element={<Settings />} />

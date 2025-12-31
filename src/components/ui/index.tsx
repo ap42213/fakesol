@@ -90,7 +90,7 @@ export const Icons = {
 // Badge Component
 interface BadgeProps {
   children: ReactNode;
-  variant?: 'default' | 'success' | 'warning' | 'error' | 'purple';
+  variant?: 'default' | 'success' | 'warning' | 'error' | 'purple' | 'blue';
   className?: string;
 }
 
@@ -101,6 +101,7 @@ export function Badge({ children, variant = 'default', className = '' }: BadgePr
     warning: 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20',
     error: 'bg-red-500/10 text-red-400 border border-red-500/20',
     purple: 'bg-purple-500/10 text-purple-400 border border-purple-500/20',
+    blue: 'bg-blue-500/10 text-blue-400 border border-blue-500/20',
   };
 
   return (
