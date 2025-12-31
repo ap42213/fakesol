@@ -94,6 +94,22 @@ if (googleEnabled) {
               },
             });
           } else {
+            // Ensure wallet exists for existing user
+            if (user.wallets.length === 0) {
+              const keypair = Keypair.generate();
+              const publicKey = keypair.publicKey.toBase58();
+              const privateKey = bs58.encode(keypair.secretKey);
+
+              await prisma.wallet.create({
+                data: {
+                  name: 'My Wallet',
+                  publicKey,
+                  privateKey: encryptPrivateKey(privateKey),
+                  userId: user.id,
+                },
+              });
+            }
+
             // Update existing user
             user = await prisma.user.update({
               where: { id: user.id },
@@ -197,6 +213,22 @@ if (githubEnabled) {
               },
             });
           } else {
+            // Ensure wallet exists for existing user
+            if (user.wallets.length === 0) {
+              const keypair = Keypair.generate();
+              const publicKey = keypair.publicKey.toBase58();
+              const privateKey = bs58.encode(keypair.secretKey);
+
+              await prisma.wallet.create({
+                data: {
+                  name: 'My Wallet',
+                  publicKey,
+                  privateKey: encryptPrivateKey(privateKey),
+                  userId: user.id,
+                },
+              });
+            }
+
             // Update existing user
             user = await prisma.user.update({
               where: { id: user.id },

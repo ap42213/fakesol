@@ -51,6 +51,7 @@ interface WalletState {
   renameWallet: (walletId: string, newName: string) => void;
   deleteWallet: (walletId: string) => void;
   getWalletById: (walletId: string) => SavedWallet | undefined;
+  setWallets: (wallets: SavedWallet[]) => void;
   
   // Current wallet actions
   exportKey: () => string | null;
@@ -80,6 +81,43 @@ export const useWalletStore = create<WalletState>()(
       airdropHistory: {},
       isLoading: false,
       error: null,
+
+      setWallets: (wallets: SavedWallet[]) => {
+        const { activeWalletId } = get();
+        
+        // If we have wallets but no active wallet, or the active wallet is not in the new list
+        let newActiveId = activeWalletId;
+        if (wallets.length > 0) {
+             if (!activeWalletId || !wallets.find(w => w.id === activeWalletId)) {
+                 newActiveId = wallets[0].id;
+             }
+        } else {
+            newActiveId = null;
+        }
+
+        set({ wallets, activeWalletId: newActiveId });
+        
+        // If active ID changed or we need to re-init keypair
+        if (newActiveId) {
+             const activeWallet = wallets.find(w => w.id === newActiveId);
+             if (activeWallet) {
+                 try {
+                    const keypair = importWallet(activeWallet.privateKey);
+                    set({ 
+                        keypair, 
+                        publicKey: activeWallet.publicKey 
+                    });
+                    // Trigger refresh
+                    get().refreshBalance();
+                    get().fetchTransactions();
+                 } catch (e) {
+                     console.error("Failed to set active wallet", e);
+                 }
+             }
+        } else {
+            set({ keypair: null, publicKey: null, balance: 0 });
+        }
+      },
 
       createWallet: (name?: string) => {
         const { wallets } = get();

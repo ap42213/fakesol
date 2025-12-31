@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useWalletStore, SavedWallet } from '../store/walletStore';
+import { useAuthStore } from '../store/authStore';
 import { shortenAddress } from '../lib/solana';
 import { Icons, Badge, Modal } from './ui/index';
 import { Button } from './ui/Button';
@@ -10,10 +11,17 @@ export function WalletSwitcher() {
     wallets, 
     activeWalletId, 
     switchWallet, 
-    createWallet, 
-    renameWallet,
-    deleteWallet,
+    createWallet: createLocalWallet, 
+    renameWallet: renameLocalWallet,
+    deleteWallet: deleteLocalWallet,
   } = useWalletStore();
+
+  const { 
+    user, 
+    createWallet: createAuthWallet,
+    renameWallet: renameAuthWallet,
+    deleteWallet: deleteAuthWallet,
+  } = useAuthStore();
   
   const [isOpen, setIsOpen] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -26,8 +34,12 @@ export function WalletSwitcher() {
 
   const activeWallet = wallets.find(w => w.id === activeWalletId);
 
-  const handleCreateWallet = () => {
-    createWallet(newWalletName || undefined);
+  const handleCreateWallet = async () => {
+    if (user) {
+      await createAuthWallet(newWalletName || undefined);
+    } else {
+      createLocalWallet(newWalletName || undefined);
+    }
     setNewWalletName('');
     setShowAddModal(false);
   };
@@ -42,16 +54,24 @@ export function WalletSwitcher() {
     setEditName(wallet.name);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (editingWallet && editName.trim()) {
-      renameWallet(editingWallet.id, editName);
+      if (user) {
+        await renameAuthWallet(editingWallet.id, editName);
+      } else {
+        renameLocalWallet(editingWallet.id, editName);
+      }
       setEditingWallet(null);
       setEditName('');
     }
   };
 
-  const handleDelete = (walletId: string) => {
-    deleteWallet(walletId);
+  const handleDelete = async (walletId: string) => {
+    if (user) {
+      await deleteAuthWallet(walletId);
+    } else {
+      deleteLocalWallet(walletId);
+    }
     setShowDeleteConfirm(null);
     if (wallets.length <= 1) {
       setShowManageModal(false);

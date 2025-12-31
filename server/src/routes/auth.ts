@@ -391,13 +391,39 @@ router.post('/logout', (req: Request, res: Response) => {
 router.get('/me', authMiddleware, async (req: Request, res: Response) => {
   const authReq = req as AuthRequest;
   try {
-    const user = await prisma!.user.findUnique({
+    let user = await prisma!.user.findUnique({
       where: { id: authReq.user!.id },
       include: { wallets: true },
     });
 
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Auto-create wallet if user has none
+    if (user.wallets.length === 0) {
+      const keypair = Keypair.generate();
+      const publicKey = keypair.publicKey.toBase58();
+      const privateKey = bs58.encode(keypair.secretKey);
+
+      await prisma!.wallet.create({
+        data: {
+          name: 'My Wallet',
+          publicKey,
+          privateKey: encryptPrivateKey(privateKey),
+          userId: user.id,
+        },
+      });
+
+      // Re-fetch user with new wallet
+      user = await prisma!.user.findUnique({
+        where: { id: authReq.user!.id },
+        include: { wallets: true },
+      });
+
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
     }
 
     const wallets = user.wallets.map((w: { id: string; name: string; publicKey: string; privateKey: string; createdAt: Date }) => ({

@@ -18,12 +18,22 @@ import { useAuthStore } from './store/authStore';
 import { ToastProvider } from './components/ui/index';
 
 function App() {
-  const { publicKey: guestPublicKey } = useWalletStore();
+  const { publicKey: guestPublicKey, setWallets } = useWalletStore();
   const { user, wallets, checkAuth } = useAuthStore();
 
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
+
+  useEffect(() => {
+    if (user && wallets.length > 0) {
+      const formattedWallets = wallets.map((w: any) => ({
+        ...w,
+        createdAt: new Date(w.createdAt).getTime()
+      }));
+      setWallets(formattedWallets);
+    }
+  }, [user, wallets, setWallets]);
 
   const hasWallet = (user && wallets.length > 0) || guestPublicKey;
 
