@@ -1,28 +1,15 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Keypair } from '@solana/web3.js';
 import bs58 from 'bs58';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
-import { Badge, CopyButton, useToast } from '../components/ui/index';
+import { CopyButton, useToast } from '../components/ui/index';
 import { SEO } from '../components/SEO';
 import { FiSearch, FiPlay, FiPause, FiSave, FiCpu, FiAlertTriangle } from 'react-icons/fi';
-import { useWalletStore } from '../store/walletStore';
-
-// Worker code as a string to avoid separate file complexity for this demo
-// In a real app, this would be a separate worker.ts file
-const WORKER_CODE = `
-  importScripts('https://unpkg.com/bs58@5.0.0/index.js');
-  // Simple polyfill for Keypair generation in worker if web3.js is too heavy
-  // For this demo, we'll just do a very naive search in the main thread 
-  // or use a simplified approach. 
-  // Actually, let's keep it in the main thread with setImmediate/setTimeout 
-  // to avoid blocking UI, as full web3.js in worker is tricky without bundler setup.
-`;
 
 export function VanityGenerator() {
   const { showToast } = useToast();
-  const { importWallet } = useWalletStore();
   
   const [prefix, setPrefix] = useState('');
   const [suffix, setSuffix] = useState('');
@@ -135,17 +122,10 @@ export function VanityGenerator() {
     
     try {
       // Convert base58 secret key back to Uint8Array for import
-      const secretKeyBytes = bs58.decode(foundKeypair.secretKey);
-      // We need to convert Uint8Array to regular array for the store if that's what it expects, 
-      // or just pass the Keypair. The store's importWallet usually takes a name and secretKey.
-      // Let's check store implementation or just assume it handles it.
-      // Actually, let's just use the secret key string if the UI supports it, 
-      // but the store likely wants a Keypair object or similar.
+      // const secretKeyBytes = bs58.decode(foundKeypair.secretKey);
       
       // For now, let's just copy to clipboard or show instructions, 
       // but we can try to auto-import if we had a direct method.
-      // The `importWallet` from store might be for the "Import Wallet" UI flow.
-      // Let's just copy for now to be safe.
       
       navigator.clipboard.writeText(foundKeypair.secretKey);
       showToast('Secret Key copied to clipboard! Go to "Settings" or "Wallet" to import.', 'success');

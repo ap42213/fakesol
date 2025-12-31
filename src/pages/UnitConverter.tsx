@@ -1,21 +1,18 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card } from '../components/ui/Card';
 import { Input } from '../components/ui/Input';
-import { Button } from '../components/ui/Button';
-import { Badge, CopyButton } from '../components/ui/index';
+import { CopyButton } from '../components/ui/index';
 import { SEO } from '../components/SEO';
-import { FiRefreshCw, FiArrowRight, FiArrowLeft, FiCopy } from 'react-icons/fi';
+import { FiRefreshCw } from 'react-icons/fi';
 
 const LAMPORTS_PER_SOL = 1000000000;
 
 export function UnitConverter() {
   const [sol, setSol] = useState<string>('1');
   const [lamports, setLamports] = useState<string>(LAMPORTS_PER_SOL.toString());
-  const [lastEdited, setLastEdited] = useState<'sol' | 'lamports'>('sol');
 
   const handleSolChange = (value: string) => {
     setSol(value);
-    setLastEdited('sol');
     
     if (value === '' || isNaN(Number(value))) {
       setLamports('');
@@ -36,7 +33,6 @@ export function UnitConverter() {
 
   const handleLamportsChange = (value: string) => {
     setLamports(value);
-    setLastEdited('lamports');
 
     if (value === '' || isNaN(Number(value))) {
       setSol('');

@@ -4,7 +4,7 @@ import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { Badge } from '../components/ui/index';
 import { SEO } from '../components/SEO';
-import { FiActivity, FiWifi, FiServer, FiClock, FiCheckCircle, FiXCircle } from 'react-icons/fi';
+import { FiActivity, FiServer } from 'react-icons/fi';
 
 interface RpcEndpoint {
   name: string;
@@ -14,13 +14,6 @@ interface RpcEndpoint {
   slot: number | null;
   version: string | null;
 }
-
-const DEFAULT_ENDPOINTS: RpcEndpoint[] = [
-  { name: 'Solana Foundation', url: 'https://api.devnet.solana.com', status: 'unknown', latency: null, slot: null, version: null },
-  { name: 'Helius (Devnet)', url: 'https://devnet.helius-rpc.com/?api-key=123', status: 'unknown', latency: null, slot: null, version: null }, // Placeholder key, might fail auth but we can check connectivity
-  { name: 'QuickNode (Devnet)', url: 'https://example.solana-devnet.quiknode.pro/123/', status: 'unknown', latency: null, slot: null, version: null }, // Placeholder
-  { name: 'GenesysGo', url: 'https://devnet.genesysgo.net/', status: 'unknown', latency: null, slot: null, version: null },
-];
 
 // Filter out placeholders for the public demo to avoid confusion, or keep them to show failure states
 const ACTIVE_ENDPOINTS = [
@@ -135,7 +128,7 @@ export function RpcHealth() {
                 {endpoint.status === 'checking' ? (
                   <Badge variant="warning">Checking...</Badge>
                 ) : endpoint.status === 'offline' ? (
-                  <Badge variant="danger">Offline</Badge>
+                  <Badge variant="error">Offline</Badge>
                 ) : endpoint.status === 'online' ? (
                   <>
                     <div className="hidden md:block">
@@ -156,7 +149,7 @@ export function RpcHealth() {
                     </div>
                   </>
                 ) : (
-                  <Badge variant="secondary">Unknown</Badge>
+                  <Badge variant="default">Unknown</Badge>
                 )}
               </div>
             </div>

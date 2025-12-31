@@ -6,15 +6,14 @@ import {
   createMintToInstruction, 
   createBurnInstruction,
   getAccount,
-  getMint,
-  TOKEN_PROGRAM_ID
+  getMint
 } from '@solana/spl-token';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Card } from '../components/ui/Card';
-import { Badge, useToast } from '../components/ui/index';
+import { useToast } from '../components/ui/index';
 import { SEO } from '../components/SEO';
-import { FiPlus, FiMinus, FiSearch, FiRefreshCw, FiSettings } from 'react-icons/fi';
+import { FiPlus, FiMinus, FiSearch } from 'react-icons/fi';
 
 export function TokenManager() {
   const { publicKey, keypair, connection } = useWalletStore();
