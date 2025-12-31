@@ -7,6 +7,7 @@ import { Receive } from './pages/Receive';
 import { Transactions } from './pages/Transactions';
 import { Tokens } from './pages/Tokens';
 import { Explore } from './pages/Explore';
+import { TokenCreator } from './pages/TokenCreator';
 import { Settings } from './pages/Settings';
 import { Welcome } from './pages/Welcome';
 import { Extension } from './pages/Extension';
@@ -61,6 +62,7 @@ function App() {
               <Route path="/receive" element={<Receive />} />
               <Route path="/transactions" element={<Transactions />} />
               <Route path="/tokens" element={<Tokens />} />
+              <Route path="/create-token" element={<TokenCreator />} />
               <Route path="/explore" element={<Explore />} />
               <Route path="/extension" element={<Extension />} />
               <Route path="/settings" element={<Settings />} />
