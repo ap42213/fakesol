@@ -18,6 +18,7 @@ import {
   getTreasuryBalance,
   sendFromTreasury,
 } from './solana.js';
+import { sendProjectSubmissionNotification } from './lib/email.js';
 import fs from 'fs';
 import path from 'path';
 
@@ -154,6 +155,17 @@ router.post('/projects', async (req: Request, res: Response) => {
   const existing = readProjects();
   existing.unshift(project);
   writeProjects(existing);
+
+  // Send email notification (async, don't wait)
+  sendProjectSubmissionNotification({
+    name: project.name,
+    url: project.url,
+    description: project.description,
+    category: project.category,
+    tags: project.tags,
+    contact: project.contact,
+    incentive: project.incentive,
+  }).catch((err) => console.error('Email notification failed:', err));
 
   res.json({ project });
 });
