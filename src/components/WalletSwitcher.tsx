@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useWalletStore, SavedWallet } from '../store/walletStore';
 import { useAuthStore } from '../store/authStore';
 import { shortenAddress } from '../lib/solana';
@@ -14,10 +14,12 @@ export function WalletSwitcher() {
     createWallet: createLocalWallet, 
     renameWallet: renameLocalWallet,
     deleteWallet: deleteLocalWallet,
+    setWallets,
   } = useWalletStore();
 
   const { 
     user, 
+    wallets: authWallets,
     createWallet: createAuthWallet,
     renameWallet: renameAuthWallet,
     deleteWallet: deleteAuthWallet,
@@ -32,6 +34,17 @@ export function WalletSwitcher() {
   const [editName, setEditName] = useState('');
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<string | null>(null);
   const [showPrivateKey, setShowPrivateKey] = useState<string | null>(null);
+
+  // Sync authStore wallets to walletStore when they change
+  useEffect(() => {
+    if (user && authWallets.length > 0) {
+      const formattedWallets = authWallets.map((w: any) => ({
+        ...w,
+        createdAt: typeof w.createdAt === 'string' ? new Date(w.createdAt).getTime() : w.createdAt
+      }));
+      setWallets(formattedWallets);
+    }
+  }, [user, authWallets, setWallets]);
 
   const activeWallet = wallets.find(w => w.id === activeWalletId);
 
